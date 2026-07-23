@@ -82,14 +82,14 @@ export function StatCards({ data, mode }: StatCardsProps) {
         label: "Best value defender",
         value: valuePrice ? formatPrice(valuePrice) : "—",
         sub: valueName === "—" ? "No data" : `${valueName} · ${valueTeam}`,
-        accent: "rgba(16,185,129,0.16)",
+        accent: "rgba(16,185,129,0.28)",
       },
       {
         icon: CalendarDays,
         label: "Fixtures tracked",
         value: String(fixturesTracked),
         sub: `${data.rows.length} teams · ${data.horizon.length} gameweeks`,
-        accent: "rgba(255,255,255,0.05)",
+        accent: "rgba(56,189,248,0.3)",
       },
     ];
   }, [data, mode]);
@@ -111,7 +111,7 @@ export function StatCards({ data, mode }: StatCardsProps) {
               style={{ backgroundColor: stat.accent }}
             />
             <div className="relative flex items-center gap-2 text-muted-foreground">
-              <Icon className="size-4 text-emerald-400" />
+              <Icon className="size-4 text-emerald-600" />
               <span className="text-[11px] font-medium uppercase tracking-wide">{stat.label}</span>
             </div>
             <p className="relative mt-2 text-2xl font-bold tracking-tight text-foreground">{stat.value}</p>

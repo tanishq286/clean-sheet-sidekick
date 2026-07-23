@@ -94,7 +94,7 @@ export function Dashboard() {
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+          <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700">
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
@@ -102,7 +102,7 @@ export function Dashboard() {
             Gameweek intelligence
           </p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Find the <span className="text-emerald-400 text-glow-emerald">clean sheets</span> before
+            Find the <span className="text-emerald-600 text-glow-emerald">clean sheets</span> before
             everyone else
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
@@ -142,7 +142,7 @@ export function Dashboard() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <Legend />
               {data.source === "mock" && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-amber-300/80">
+                <span className="inline-flex items-center gap-1.5 text-xs text-amber-600">
                   <AlertTriangle className="size-3.5" />
                   Demo dataset — live FPL feed not reachable from this environment.
                 </span>
@@ -151,7 +151,7 @@ export function Dashboard() {
           </div>
         )}
 
-        <footer className="mt-16 flex flex-col items-center gap-2 border-t border-white/5 pt-8 text-center text-xs text-muted-foreground">
+        <footer className="mt-16 flex flex-col items-center gap-2 border-t border-black/[0.07] pt-8 text-center text-xs text-muted-foreground">
           <p>
             Clean Sheet Sidekick · Probabilities are model estimates, not betting advice. Data
             sourced from the public FPL API.
@@ -160,7 +160,7 @@ export function Dashboard() {
             href="https://github.com/tanishq286/clean-sheet-sidekick"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-muted-foreground/70 transition-colors hover:text-emerald-300"
+            className="inline-flex items-center gap-1.5 text-muted-foreground/70 transition-colors hover:text-emerald-600"
           >
             <Github className="size-3.5" />
             View source

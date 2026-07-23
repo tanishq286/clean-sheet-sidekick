@@ -22,8 +22,8 @@ export default function GlobalError({
           display: "grid",
           placeItems: "center",
           background:
-            "radial-gradient(circle at 50% 120%, #0f1713 0%, #0a0f0d 60%)",
-          color: "#e6f0eb",
+            "radial-gradient(1000px 700px at 50% -10%, rgba(16,185,129,0.22), transparent 55%), #eef7f2",
+          color: "#0b1f17",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
         }}
       >
@@ -31,7 +31,7 @@ export default function GlobalError({
           <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: 8 }}>
             Clean Sheet Sidekick crashed
           </h2>
-          <p style={{ fontSize: "0.875rem", color: "#8ca79a", marginBottom: 20 }}>
+          <p style={{ fontSize: "0.875rem", color: "#547365", marginBottom: 20 }}>
             A critical error occurred. Please reload to continue.
           </p>
           <button

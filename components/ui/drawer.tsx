@@ -29,12 +29,12 @@ function DrawerContent({
       <DrawerPrimitive.Content
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[92dvh] flex-col rounded-t-2xl",
-          "glass-strong border-t border-white/10 outline-none",
+          "glass-strong border-t border-black/10 outline-none",
           className,
         )}
         {...props}
       >
-        <div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-white/20" />
+        <div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-black/15" />
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>

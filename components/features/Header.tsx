@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export function Header({ nextGameweek, source, isFetching, onRefresh }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0f0d]/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-black/[0.07] bg-white/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_0_20px_-2px_rgba(16,185,129,0.7)]">
@@ -24,7 +24,7 @@ export function Header({ nextGameweek, source, isFetching, onRefresh }: HeaderPr
           </div>
           <div className="leading-tight">
             <p className="text-sm font-semibold tracking-tight">
-              Clean Sheet <span className="text-emerald-400">Sidekick</span>
+              Clean Sheet <span className="text-emerald-600">Sidekick</span>
             </p>
             <p className="hidden text-[11px] text-muted-foreground sm:block">
               FPL defensive fixture intelligence
@@ -34,7 +34,7 @@ export function Header({ nextGameweek, source, isFetching, onRefresh }: HeaderPr
 
         <div className="flex items-center gap-3">
           {nextGameweek && (
-            <div className="hidden items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 md:flex">
+            <div className="hidden items-center gap-3 rounded-xl border border-black/10 bg-white/60 px-3 py-1.5 md:flex">
               <div className="text-right leading-tight">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                   {nextGameweek.name} deadline

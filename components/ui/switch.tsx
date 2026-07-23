@@ -8,9 +8,9 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
   return (
     <SwitchPrimitive.Root
       className={cn(
-        "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border border-white/10 transition-colors outline-none",
+        "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border border-black/10 transition-colors outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring/70 disabled:cursor-not-allowed disabled:opacity-50",
-        "data-[state=checked]:bg-emerald-500/80 data-[state=unchecked]:bg-white/10",
+        "data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-black/[0.12]",
         className,
       )}
       {...props}

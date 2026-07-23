@@ -6,7 +6,7 @@ export default function NotFound() {
   return (
     <div className="grid min-h-[80dvh] place-items-center px-6">
       <div className="flex max-w-md flex-col items-center gap-4 text-center">
-        <div className="grid size-14 place-items-center rounded-full bg-emerald-500/15 text-emerald-300">
+        <div className="grid size-14 place-items-center rounded-full bg-emerald-500/15 text-emerald-700">
           <Compass className="size-7" />
         </div>
         <div className="space-y-1">

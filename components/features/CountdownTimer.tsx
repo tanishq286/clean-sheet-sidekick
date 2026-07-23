@@ -42,7 +42,7 @@ export function CountdownTimer({ deadline, onExpire }: CountdownTimerProps) {
       {blocks.map((b, i) => (
         <React.Fragment key={b.label}>
           <div className="flex flex-col items-center">
-            <span className="min-w-[2ch] text-center font-mono text-sm font-semibold tabular-nums text-emerald-300">
+            <span className="min-w-[2ch] text-center font-mono text-sm font-semibold tabular-nums text-emerald-700">
               {mounted ? b.value : "--"}
             </span>
             <span className="text-[9px] font-medium uppercase text-muted-foreground">{b.label}</span>

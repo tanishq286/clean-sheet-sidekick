@@ -9,10 +9,10 @@ export function Toaster() {
       toastOptions={{
         classNames: {
           toast:
-            "glass-strong !rounded-xl !border-white/10 !text-foreground !shadow-2xl",
+            "glass-strong !rounded-xl !border-black/10 !text-foreground !shadow-2xl",
           description: "!text-muted-foreground",
           actionButton: "!bg-emerald-500 !text-emerald-950",
-          cancelButton: "!bg-white/10 !text-foreground",
+          cancelButton: "!bg-black/[0.06] !text-foreground",
           error: "!border-rose-400/30",
           success: "!border-emerald-400/30",
         },

@@ -28,7 +28,7 @@ export async function exportNodeToPng(node: HTMLElement, filename: string): Prom
   const dataUrl = await toPng(node, {
     cacheBust: true,
     pixelRatio: 2,
-    backgroundColor: "#0A0F0D",
+    backgroundColor: "#ffffff",
   });
   saveAs(dataUrl, filename);
 }

@@ -54,17 +54,25 @@ function mix(from: Rgb, to: Rgb, t: number): Rgb {
   return [lerp(from[0], to[0], t), lerp(from[1], to[1], t), lerp(from[2], to[2], t)];
 }
 
+// Real clean-sheet probabilities cluster in a narrow band, so we normalise
+// against the range they actually occupy before colouring. This lets the full
+// rose → amber → emerald gradient breathe instead of everything reading amber.
+const PROB_FLOOR = 0.08;
+const PROB_CEIL = 0.58;
+
 /** Map a 0..1 probability onto the rose → amber → emerald gradient. */
 export function probabilityColor(prob: number): CellColor {
-  const p = clamp(prob, 0, 1);
-  const [r, g, b] = p < 0.5 ? mix(LOW, MID, p / 0.5) : mix(MID, HIGH, (p - 0.5) / 0.5);
-  // Higher probability => more saturated / brighter fill.
-  const alpha = 0.16 + p * 0.42;
+  const raw = clamp(prob, 0, 1);
+  const t = clamp((raw - PROB_FLOOR) / (PROB_CEIL - PROB_FLOOR), 0, 1);
+  const [r, g, b] = t < 0.5 ? mix(LOW, MID, t / 0.5) : mix(MID, HIGH, (t - 0.5) / 0.5);
+  // Stronger fixtures get a more saturated / vivid fill.
+  const alpha = 0.22 + t * 0.55;
   return {
     bg: `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`,
-    border: `rgba(${r}, ${g}, ${b}, ${(0.35 + p * 0.4).toFixed(3)})`,
-    glow: `rgba(${r}, ${g}, ${b}, ${(p * 0.5).toFixed(3)})`,
-    text: p > 0.42 ? "#ecfdf5" : "#fff1f2",
+    border: `rgba(${r}, ${g}, ${b}, ${(0.32 + t * 0.45).toFixed(3)})`,
+    glow: `rgba(${r}, ${g}, ${b}, ${(t * 0.55).toFixed(3)})`,
+    // Dark ink reads cleanly on the light, pastel-tinted fills.
+    text: "#08281c",
   };
 }
 

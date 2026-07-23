@@ -12,7 +12,7 @@ interface TeamCardProps {
 export function TeamCard({ team, averageProb, rank }: TeamCardProps) {
   const color = probabilityColor(averageProb);
   return (
-    <div className="sticky left-0 z-10 flex h-16 w-[168px] shrink-0 items-center gap-3 border-b border-white/5 bg-[#0c130f] px-3">
+    <div className="sticky left-0 z-10 flex h-16 w-[188px] shrink-0 items-center gap-3 border-b border-black/[0.06] bg-white px-3">
       <span className="w-4 text-right font-mono text-xs text-muted-foreground/60">{rank}</span>
       <span
         className="grid size-9 shrink-0 place-items-center rounded-lg text-[11px] font-bold"
@@ -23,7 +23,7 @@ export function TeamCard({ team, averageProb, rank }: TeamCardProps) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-semibold text-foreground">{team.name}</p>
         <div className="mt-1 flex items-center gap-1.5">
-          <div className="h-1 w-14 overflow-hidden rounded-full bg-white/10">
+          <div className="h-1 w-14 overflow-hidden rounded-full bg-black/[0.1]">
             <div
               className="h-full rounded-full"
               style={{

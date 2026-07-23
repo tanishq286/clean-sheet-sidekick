@@ -13,7 +13,7 @@ function Slider({ className, ...props }: React.ComponentProps<typeof SliderPrimi
       className={cn("relative flex w-full touch-none select-none items-center", className)}
       {...props}
     >
-      <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-white/10">
+      <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-black/[0.1]">
         <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-emerald-500 to-emerald-400" />
       </SliderPrimitive.Track>
       {values.map((_, i) => (

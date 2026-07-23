@@ -2,36 +2,36 @@
 @import "tw-animate-css";
 
 /* ------------------------------------------------------------------ */
-/* Design tokens — permanent pitch-dark theme                         */
+/* Design tokens — bright, radiant theme                              */
 /* ------------------------------------------------------------------ */
 
 :root {
-  --background: #0a0f0d;
-  --foreground: #e6f0eb;
+  --background: #eef7f2;
+  --foreground: #0b1f17;
 
-  --card: #0f1713;
-  --card-foreground: #e6f0eb;
+  --card: #ffffff;
+  --card-foreground: #0b1f17;
 
-  --popover: #0d1512;
-  --popover-foreground: #e6f0eb;
+  --popover: #ffffff;
+  --popover-foreground: #0b1f17;
 
-  --primary: #10b981;
-  --primary-foreground: #04120c;
+  --primary: #059669;
+  --primary-foreground: #ffffff;
 
-  --secondary: #16211b;
-  --secondary-foreground: #e6f0eb;
+  --secondary: #e4f3ec;
+  --secondary-foreground: #0b1f17;
 
-  --muted: #16211b;
-  --muted-foreground: #8ca79a;
+  --muted: #eaf3ee;
+  --muted-foreground: #547365;
 
   --accent: #10b981;
   --accent-foreground: #04120c;
 
-  --destructive: #f43f5e;
-  --destructive-foreground: #fff5f5;
+  --destructive: #e11d48;
+  --destructive-foreground: #ffffff;
 
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.12);
+  --border: rgba(6, 44, 32, 0.1);
+  --input: rgba(6, 44, 32, 0.14);
   --ring: #10b981;
 
   --radius: 0.85rem;
@@ -112,18 +112,20 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     background-color: var(--background);
+    /* Radiant, colourful glows over a near-white canvas. */
     background-image:
-      radial-gradient(1200px 800px at 15% -10%, rgba(16, 185, 129, 0.12), transparent 55%),
-      radial-gradient(1000px 700px at 100% 0%, rgba(5, 150, 105, 0.1), transparent 50%),
-      radial-gradient(circle at 50% 120%, #0f1713 0%, #0a0f0d 60%);
+      radial-gradient(1200px 820px at 10% -12%, rgba(16, 185, 129, 0.28), transparent 55%),
+      radial-gradient(1050px 720px at 100% -6%, rgba(45, 212, 191, 0.24), transparent 52%),
+      radial-gradient(900px 720px at 50% 118%, rgba(132, 204, 22, 0.18), transparent 55%),
+      radial-gradient(820px 620px at 88% 108%, rgba(56, 189, 248, 0.16), transparent 52%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    background: rgba(16, 185, 129, 0.28);
-    color: #ecfdf5;
+    background: rgba(16, 185, 129, 0.24);
+    color: #052e1c;
   }
 }
 
@@ -133,21 +135,21 @@
 
 @layer utilities {
   .glass-panel {
-    background: rgba(255, 255, 255, 0.045);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    border: 1px solid rgba(6, 44, 32, 0.08);
   }
 
   .glass-strong {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(22px) saturate(1.4);
+    -webkit-backdrop-filter: blur(22px) saturate(1.4);
+    border: 1px solid rgba(6, 44, 32, 0.1);
   }
 
   .text-glow-emerald {
-    text-shadow: 0 0 22px rgba(16, 185, 129, 0.55);
+    text-shadow: 0 1px 26px rgba(16, 185, 129, 0.45);
   }
 
   .grid-fade-mask {
@@ -157,18 +159,18 @@
   /* Slim, themed scrollbars for the horizontally scrolling matrix. */
   .scrollbar-slim {
     scrollbar-width: thin;
-    scrollbar-color: rgba(16, 185, 129, 0.4) transparent;
+    scrollbar-color: rgba(16, 185, 129, 0.45) transparent;
   }
   .scrollbar-slim::-webkit-scrollbar {
     height: 8px;
     width: 8px;
   }
   .scrollbar-slim::-webkit-scrollbar-thumb {
-    background: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.4);
     border-radius: 9999px;
   }
   .scrollbar-slim::-webkit-scrollbar-thumb:hover {
-    background: rgba(16, 185, 129, 0.55);
+    background: rgba(16, 185, 129, 0.6);
   }
   .scrollbar-slim::-webkit-scrollbar-track {
     background: transparent;

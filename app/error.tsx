@@ -18,7 +18,7 @@ export default function Error({
   return (
     <div className="grid min-h-[70dvh] place-items-center px-6">
       <div className="glass-strong flex max-w-md flex-col items-center gap-4 rounded-2xl p-8 text-center">
-        <div className="grid size-14 place-items-center rounded-full bg-rose-500/15 text-rose-300">
+        <div className="grid size-14 place-items-center rounded-full bg-rose-500/15 text-rose-600">
           <AlertTriangle className="size-7" />
         </div>
         <div className="space-y-1">

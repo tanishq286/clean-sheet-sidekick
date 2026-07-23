@@ -2,7 +2,7 @@
 
 import { probabilityColor } from "@/lib/utils";
 
-const STOPS = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85];
+const STOPS = [0.1, 0.2, 0.3, 0.4, 0.48, 0.56];
 
 export function Legend() {
   return (
@@ -19,7 +19,7 @@ export function Legend() {
         <span>High</span>
       </div>
       <span className="hidden items-center gap-1.5 sm:inline-flex">
-        <span className="grid size-4 place-items-center rounded bg-white/5 text-[8px] text-muted-foreground/50">B</span>
+        <span className="grid size-4 place-items-center rounded bg-black/[0.06] text-[8px] text-muted-foreground/60">B</span>
         Blank gameweek
       </span>
     </div>

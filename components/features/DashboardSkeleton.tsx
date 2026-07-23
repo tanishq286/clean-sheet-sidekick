@@ -18,8 +18,8 @@ export function DashboardSkeleton() {
       <Skeleton className="h-36 w-full rounded-xl" />
 
       {/* Matrix */}
-      <div className="overflow-hidden rounded-xl border border-white/10">
-        <div className="flex border-b border-white/10 bg-white/[0.02] p-2">
+      <div className="overflow-hidden rounded-xl border border-black/10 bg-white/50">
+        <div className="flex border-b border-black/10 bg-white/40 p-2">
           <Skeleton className="h-8 w-[160px]" />
           <div className="ml-2 flex gap-2">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -28,7 +28,7 @@ export function DashboardSkeleton() {
           </div>
         </div>
         {Array.from({ length: 10 }).map((_, r) => (
-          <div key={r} className="flex items-center gap-2 border-b border-white/5 p-2">
+          <div key={r} className="flex items-center gap-2 border-b border-black/[0.06] p-2">
             <Skeleton className="h-10 w-[160px]" />
             <div className="ml-0 flex gap-2">
               {Array.from({ length: 6 }).map((_, c) => (

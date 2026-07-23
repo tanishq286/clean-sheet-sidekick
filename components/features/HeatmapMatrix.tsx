@@ -27,7 +27,7 @@ function isMuted(cell: CleanSheetCell, filters: HeatmapFilters): boolean {
 export function HeatmapMatrix({ rows, horizon, mode, filters, nextGwId, matrixRef }: HeatmapMatrixProps) {
   if (rows.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] py-20 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-black/10 bg-white/50 py-20 text-center">
         <SearchX className="size-8 text-muted-foreground/50" />
         <div>
           <p className="font-medium text-foreground">No teams match your filters</p>
@@ -38,11 +38,11 @@ export function HeatmapMatrix({ rows, horizon, mode, filters, nextGwId, matrixRe
   }
 
   return (
-    <div className="overflow-auto rounded-xl border border-white/10 scrollbar-slim max-h-[74vh]">
-      <div ref={matrixRef} className="min-w-max bg-[#0a0f0d]">
+    <div className="overflow-auto rounded-xl border border-black/10 bg-white shadow-[0_20px_60px_-40px_rgba(6,44,32,0.5)] scrollbar-slim max-h-[74vh]">
+      <div ref={matrixRef} className="min-w-max bg-white">
         {/* Header row */}
-        <div className="sticky top-0 z-20 flex border-b border-white/10 bg-[#0c130f]/95 backdrop-blur">
-          <div className="sticky left-0 z-30 flex h-11 w-[168px] shrink-0 items-center bg-[#0c130f] px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="sticky top-0 z-20 flex border-b border-black/10 bg-white/95 backdrop-blur">
+          <div className="sticky left-0 z-30 flex h-11 w-[188px] shrink-0 items-center bg-white px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             Team / GW
           </div>
           {horizon.map((gw) => {
@@ -51,8 +51,8 @@ export function HeatmapMatrix({ rows, horizon, mode, filters, nextGwId, matrixRe
               <div
                 key={gw}
                 className={cn(
-                  "flex h-11 w-[88px] shrink-0 flex-col items-center justify-center border-l border-white/5 text-xs font-semibold",
-                  isNext ? "bg-emerald-500/10 text-emerald-300" : "text-muted-foreground",
+                  "flex h-11 w-[88px] shrink-0 flex-col items-center justify-center border-l border-black/[0.06] text-xs font-semibold",
+                  isNext ? "bg-emerald-500/15 text-emerald-700" : "text-muted-foreground",
                 )}
               >
                 <span>GW{gw}</span>

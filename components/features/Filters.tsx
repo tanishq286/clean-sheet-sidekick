@@ -41,7 +41,7 @@ export function Filters({ filters, teams, onChange }: FiltersProps) {
     filters.maxPrice !== PRICE_MAX;
 
   return (
-    <div className="space-y-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+    <div className="space-y-4 rounded-xl glass-panel p-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.4fr_auto]">
         <div className="space-y-2">
           <Label>Venue</Label>
@@ -60,7 +60,7 @@ export function Filters({ filters, teams, onChange }: FiltersProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>Max FDR</Label>
-            <span className="font-mono text-xs text-emerald-300">{filters.maxFdr}</span>
+            <span className="font-mono text-xs text-emerald-700">{filters.maxFdr}</span>
           </div>
           <Slider
             min={1}
@@ -75,7 +75,7 @@ export function Filters({ filters, teams, onChange }: FiltersProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>Defender price</Label>
-            <span className="font-mono text-xs text-emerald-300">
+            <span className="font-mono text-xs text-emerald-700">
               {formatPrice(filters.minPrice)} – {formatPrice(filters.maxPrice)}
             </span>
           </div>
@@ -117,8 +117,8 @@ export function Filters({ filters, teams, onChange }: FiltersProps) {
                 className={cn(
                   "rounded-md border px-2 py-1 text-[11px] font-semibold transition-colors",
                   active
-                    ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-200"
-                    : "border-white/10 bg-white/5 text-muted-foreground hover:border-white/20 hover:text-foreground",
+                    ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-700"
+                    : "border-black/10 bg-white/60 text-muted-foreground hover:border-black/20 hover:text-foreground",
                 )}
               >
                 {team.shortName}

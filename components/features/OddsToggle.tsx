@@ -20,7 +20,7 @@ export function OddsToggle({ mode, onChange }: OddsToggleProps) {
     <div
       role="radiogroup"
       aria-label="Probability source"
-      className="relative inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1"
+      className="relative inline-flex items-center gap-1 rounded-lg border border-black/10 bg-white/60 p-1"
     >
       {OPTIONS.map((opt) => {
         const active = mode === opt.value;
@@ -33,7 +33,7 @@ export function OddsToggle({ mode, onChange }: OddsToggleProps) {
             onClick={() => onChange(opt.value)}
             className={cn(
               "relative z-10 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-              active ? "text-emerald-200" : "text-muted-foreground hover:text-foreground",
+              active ? "text-emerald-700" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {active && (

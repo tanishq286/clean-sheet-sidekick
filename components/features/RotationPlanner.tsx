@@ -72,7 +72,7 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
         <DrawerHeader className="flex flex-row items-start justify-between">
           <div>
             <DrawerTitle className="flex items-center gap-2">
-              <Sparkles className="size-4 text-emerald-400" />
+              <Sparkles className="size-4 text-emerald-600" />
               Defender Rotation Finder
             </DrawerTitle>
             <DrawerDescription>
@@ -109,7 +109,7 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search defenders…"
-                className="h-9 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/70"
+                className="h-9 w-full rounded-lg border border-black/10 bg-white/70 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/70"
               />
             </div>
 
@@ -126,12 +126,12 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
                       "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
                       active
                         ? "border-emerald-400/40 bg-emerald-500/15"
-                        : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/5",
-                      disabled && "cursor-not-allowed opacity-40 hover:border-white/10 hover:bg-white/[0.02]",
+                        : "border-black/10 bg-white/50 hover:border-black/20 hover:bg-white/80",
+                      disabled && "cursor-not-allowed opacity-40 hover:border-black/10 hover:bg-white/50",
                     )}
                   >
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-md bg-white/5 text-[10px] font-bold text-muted-foreground">
+                      <span className="grid size-7 shrink-0 place-items-center rounded-md bg-black/[0.05] text-[10px] font-bold text-muted-foreground">
                         {def.teamShort}
                       </span>
                       <span className="truncate font-medium text-foreground">{def.name}</span>
@@ -153,7 +153,7 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
                 <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Starting slots
                 </span>
-                <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
+                <div className="flex items-center gap-1 rounded-lg border border-black/10 bg-white/60 p-1">
                   {SLOT_OPTIONS.map((s) => (
                     <button
                       key={s}
@@ -161,7 +161,7 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
                       className={cn(
                         "rounded-md px-2.5 py-1 text-xs font-semibold transition-colors",
                         slots === s
-                          ? "bg-emerald-500/20 text-emerald-200"
+                          ? "bg-emerald-500/15 text-emerald-700"
                           : "text-muted-foreground hover:text-foreground",
                       )}
                     >
@@ -182,7 +182,7 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
             </div>
 
             {selectedDefenders.length === 0 ? (
-              <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 text-center">
+              <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-black/15 text-center">
                 <Users className="size-7 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">
                   Select defenders on the left to build your rotation.
@@ -193,11 +193,11 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
                 {plan.gameweeks.map((gw) => (
                   <div
                     key={gw.gameweek}
-                    className="w-[190px] shrink-0 rounded-xl border border-white/10 bg-white/[0.02] p-3"
+                    className="w-[190px] shrink-0 rounded-xl border border-black/10 bg-white/50 p-3"
                   >
                     <div className="mb-2 flex items-center justify-between">
                       <span className="text-sm font-semibold">GW{gw.gameweek}</span>
-                      <span className="font-mono text-xs text-emerald-300">
+                      <span className="font-mono text-xs text-emerald-700">
                         {formatPercent(gw.expectedCleanSheets / Math.max(plan.slots, 1))}
                       </span>
                     </div>
@@ -209,20 +209,20 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
                             key={pick.defenderId}
                             className={cn(
                               "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs transition-opacity",
-                              pick.starting ? "ring-1 ring-emerald-400/40" : "opacity-45",
+                              pick.starting ? "ring-1 ring-emerald-500/50" : "opacity-45",
                             )}
-                            style={{ backgroundColor: pick.blank ? "rgba(255,255,255,0.03)" : c.bg }}
+                            style={{ backgroundColor: pick.blank ? "rgba(6,44,32,0.04)" : c.bg }}
                           >
                             <span className="flex min-w-0 items-center gap-1.5">
                               {pick.starting && (
                                 <motion.span
                                   layout
-                                  className="size-1.5 shrink-0 rounded-full bg-emerald-300"
+                                  className="size-1.5 shrink-0 rounded-full bg-emerald-600"
                                 />
                               )}
-                              <span className="truncate font-medium text-white/90">{pick.name}</span>
+                              <span className="truncate font-medium text-black/80">{pick.name}</span>
                             </span>
-                            <span className="shrink-0 font-mono text-white/80">
+                            <span className="shrink-0 font-mono text-black/70">
                               {pick.blank ? "—" : formatPercent(pick.prob)}
                             </span>
                           </div>
