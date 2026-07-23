@@ -1,4 +1,30 @@
-# Logs
+# dependencies
+node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# relocated legacy Vite/Supabase portfolio app (preserved in git history + on main)
+/legacy-portfolio-app/
+
+# production
+/build
+dist
+dist-ssr
+
+# misc
+.DS_Store
+*.pem
+*.local
+
+# debug
 logs
 *.log
 npm-debug.log*
@@ -7,16 +33,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# env files
+.env
+.env*.local
 
-# Editor directories and files
+# typescript / next
+*.tsbuildinfo
+next-env.d.ts
+
+# editor
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj

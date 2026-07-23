@@ -1,77 +1,93 @@
-# Welcome to your Lovable project
+# Clean Sheet Sidekick
 
-## Project info
+A pitch-dark, production-grade **Fantasy Premier League** dashboard that forecasts
+**clean-sheet probabilities** across upcoming gameweeks, overlays bookmaker-style
+market odds, and helps you plan budget-defender rotations.
 
-**URL**: https://lovable.dev/projects/6fd12b81-631e-49d3-83b3-86e8b3fab3ae
+Built with **Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 ·
+shadcn-style UI · Framer Motion · TanStack Query v5**.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **Clean Sheet Heatmap Matrix** — teams down the rows, gameweeks across the columns,
+  every fixture colour-coded by clean-sheet probability with animated cells, sticky
+  team column, and horizontal scroll on mobile.
+- **Model vs Market toggle** — switch between the Poisson xGC model and an odds-implied
+  (de-vigged) market overlay.
+- **Defender Rotation Finder** — pick up to four defenders and get the optimal ones to
+  start each gameweek, with expected-clean-sheet coverage.
+- **Interactive filters** — price range, team, home/away, and Fixture Difficulty Rating.
+- **Live gameweek deadline countdown** in a sticky header, with auto-refresh on expiry.
+- **One-click export** to CSV and PNG.
+- **Resilient by design** — server-side API proxies with caching, and a full mock
+  dataset fallback so the UI **never renders blank**, even when the FPL API is
+  rate-limited, blocked, or offline.
+- **Error boundaries + Suspense skeletons + toast notifications** throughout.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6fd12b81-631e-49d3-83b3-86e8b3fab3ae) and start prompting.
+## Architecture
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+app/
+  api/fpl/route.ts     Server proxy for the FPL API (caching + mock fallback)
+  api/odds/route.ts    Server proxy for the clean-sheet odds overlay
+  layout.tsx           Root layout, metadata, providers
+  page.tsx             Dashboard entry
+  loading.tsx          Suspense skeleton
+  error.tsx            Route error boundary
+  global-error.tsx     App-level error boundary
+  globals.css          Tailwind v4 theme (pitch-dark, glassmorphism, emerald accents)
+components/
+  ui/                  shadcn-style primitives (button, card, dialog, drawer, …)
+  features/            HeatmapMatrix, RotationPlanner, TeamCard, OddsToggle, Filters, …
+lib/
+  fpl-api.ts           Server-side FPL fetch + transform (+ graceful fallback)
+  odds-source.ts       Odds overlay source (bookmaker hook + model fallback)
+  odds-calculator.ts   Poisson xGC clean-sheet model + odds helpers
+  clean-sheet.ts       Pure matrix builders + odds merge
+  rotation.ts          Rotation-planner optimiser
+  mock-data.ts         20-team resilient mock dataset
+  types.ts             Strict domain + API types (no `any`)
+  hooks.ts             TanStack Query hooks
 ```
 
-**Edit a file directly in GitHub**
+## How the clean-sheet model works
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+For each fixture we estimate expected goals conceded (xGC) from the FPL strength
+ratings — scaling by the opponent's attack, the team's own defence, and a home/away
+adjustment — then treat goals conceded as a Poisson process:
 
-**Use GitHub Codespaces**
+```
+P(clean sheet) = P(0 conceded) = e^(-xGC)
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The market overlay converts (mock or live) decimal odds into implied probabilities and
+removes the bookmaker margin (de-vig) so the two outcomes sum to 1.
 
-## What technologies are used for this project?
+## Getting started
 
-This project is built with:
+```bash
+npm install
+npm run dev      # http://localhost:3000
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+npm run build    # production build (zero type/lint errors)
+npm run start    # serve the production build
+npm run lint     # eslint
+npm run typecheck
+```
 
-## How can I deploy this project?
+### Optional environment variables
 
-Simply open [Lovable](https://lovable.dev/projects/6fd12b81-631e-49d3-83b3-86e8b3fab3ae) and click on Share -> Publish.
+| Variable        | Purpose                                                            |
+| --------------- | ----------------------------------------------------------------- |
+| `ODDS_API_KEY`  | Enables a live bookmaker odds feed. Falls back to the model overlay when unset. |
 
-## Can I connect a custom domain to my Lovable project?
+No key is required — the app is fully functional offline via the mock dataset.
 
-Yes, you can!
+## Data & disclaimer
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-
-# ./tailwind-plus folder:
-
-The tailwind-plus folder contains tailwind components and themes to be used as inspiration for the project. DO NOT REMOVE THE FOLDER UNLESS SPECIFICALLY TOLD TO DO SO
+Fixture and strength data come from the public Fantasy Premier League API. Clean-sheet
+probabilities are model estimates for entertainment/analysis, **not betting advice**.
