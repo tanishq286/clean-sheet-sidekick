@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { PresetBar } from "@/components/features/PresetBar";
 import { cn, formatPrice } from "@/lib/utils";
 import type { HeatmapFilters, Team, Venue } from "@/lib/types";
 
@@ -127,6 +128,15 @@ export function Filters({ filters, teams, onChange }: FiltersProps) {
           })}
         </div>
       </div>
+
+      <PresetBar<HeatmapFilters>
+        kind="filters"
+        label="Saved filters"
+        canSave
+        getPayload={() => filters}
+        onLoad={(payload) => onChange(payload)}
+        className="border-t border-black/[0.07] pt-3"
+      />
     </div>
   );
 }

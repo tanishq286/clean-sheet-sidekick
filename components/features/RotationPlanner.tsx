@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PresetBar } from "@/components/features/PresetBar";
 import { computeRotationPlan, MAX_ROTATION_DEFENDERS } from "@/lib/rotation";
+import type { SquadPresetPayload } from "@/lib/presets";
 import { cn, formatPercent, formatPrice, probabilityColor } from "@/lib/utils";
 import type { CleanSheetData, OddsMode } from "@/lib/types";
 
@@ -147,6 +149,18 @@ export function RotationPlanner({ data, mode }: RotationPlannerProps) {
 
           {/* Plan */}
           <div className="space-y-4">
+            <PresetBar<SquadPresetPayload>
+              kind="squad"
+              label="Saved squads"
+              canSave={selectedIds.length > 0}
+              getPayload={() => ({ defenderIds: selectedIds, slots })}
+              onLoad={(payload) => {
+                setSelectedIds(payload.defenderIds.slice(0, MAX_ROTATION_DEFENDERS));
+                setSlots(Math.min(Math.max(payload.slots, 1), 3));
+              }}
+              className="rounded-lg border border-black/10 bg-white/40 p-2.5"
+            />
+
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Layers className="size-4 text-muted-foreground" />
