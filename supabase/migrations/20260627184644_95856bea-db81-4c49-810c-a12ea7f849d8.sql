@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.is_profile_published(uuid) TO anon, authenticated, service_role;
