@@ -1,7 +1,7 @@
 import type { Theme } from "@/types/founder";
 
 export function themeStyle(theme: Theme): React.CSSProperties {
-  return { ["--accent" as any]: theme.accent } as React.CSSProperties;
+  return { "--accent": theme.accent } as unknown as React.CSSProperties;
 }
 
 export const STAGE_LABEL: Record<string, string> = {

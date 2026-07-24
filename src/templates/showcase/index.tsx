@@ -2,6 +2,16 @@ import type { TemplateProps } from "../types";
 import { motion } from "framer-motion";
 import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
 
+type VentureCard = {
+  name?: string | null;
+  industry?: string | null;
+  stage?: string | null;
+  problem?: string | null;
+  mission?: string | null;
+  primary: boolean;
+  [key: string]: unknown;
+};
+
 // Cinematic showcase: full-bleed cover, large portrait, venture cards as gallery.
 export default function ShowcaseTemplate({ profile }: TemplateProps) {
   const { identity, founder, vision, contact, looking_for, skills, milestones, portfolio, theme } = profile;
@@ -10,7 +20,7 @@ export default function ShowcaseTemplate({ profile }: TemplateProps) {
       ? { name: founder.current_venture, industry: founder.industry, stage: founder.stage, problem: founder.problem, mission: founder.mission, primary: true }
       : null,
     ...((founder.additional_ventures ?? []).map((v) => ({ ...v, primary: false }))),
-  ].filter(Boolean) as Array<any>;
+  ].filter(Boolean) as Array<VentureCard>;
 
   return (
     <div style={themeStyle(theme)} className="min-h-screen bg-[#0b0b0d] text-neutral-100">

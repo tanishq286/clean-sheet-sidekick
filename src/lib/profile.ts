@@ -6,15 +6,19 @@ export async function fetchMyProfile(userId: string): Promise<FullProfile | null
     .from("profiles").select("*").eq("id", userId).maybeSingle();
   if (error) throw error;
   if (!profile) return null;
-  return await hydrate(profile as any);
+  return await hydrate(profile as unknown as FounderProfile);
 }
 
 export async function fetchProfileBySlug(slug: string): Promise<FullProfile | null> {
-  const { data, error } = await (supabase.rpc as any)("get_public_profile_by_slug", { _slug: slug });
+  const rpc = supabase.rpc as unknown as (
+    fn: string,
+    args: Record<string, string>,
+  ) => Promise<{ data: FounderProfile | FounderProfile[] | null; error: Error | null }>;
+  const { data, error } = await rpc("get_public_profile_by_slug", { _slug: slug });
   if (error) throw error;
   const profile = Array.isArray(data) ? data[0] : data;
   if (!profile) return null;
-  return await hydrate(profile as any);
+  return await hydrate(profile as unknown as FounderProfile);
 }
 
 async function hydrate(profile: FounderProfile): Promise<FullProfile> {
@@ -32,7 +36,7 @@ async function hydrate(profile: FounderProfile): Promise<FullProfile> {
 }
 
 export async function updateProfile(userId: string, patch: Partial<FounderProfile>) {
-  const { error } = await supabase.from("profiles").update(patch as any).eq("id", userId);
+  const { error } = await supabase.from("profiles").update(patch as never).eq("id", userId);
   if (error) throw error;
 }
 

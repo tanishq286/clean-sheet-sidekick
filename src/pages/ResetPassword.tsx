@@ -28,8 +28,9 @@ export default function ResetPassword() {
       if (error) throw error;
       toast({ title: "Password updated" });
       navigate("/app");
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally { setLoading(false); }
   };
 

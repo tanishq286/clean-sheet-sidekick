@@ -13,7 +13,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     queryFn: async () => (await supabase.from("user_roles").select("role").eq("user_id", user!.id)).data ?? [],
     enabled: !!user,
   });
-  const isAdmin = roles.some((r: any) => r.role === "admin" || r.role === "college_admin");
+  const isAdmin = roles.some((r: { role: string }) => r.role === "admin" || r.role === "college_admin");
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b">
