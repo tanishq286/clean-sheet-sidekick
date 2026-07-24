@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { rememberPostAuthRedirect } from "@/lib/authRedirect";
@@ -77,9 +76,16 @@ export default function Auth() {
 
   const google = async () => {
     rememberPostAuthRedirect("/app");
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) toast({ title: "Google sign-in failed", description: String(result.error), variant: "destructive" });
-    else if (!result.redirected) navigate("/app");
+    // Supabase-native Google OAuth (portable to any host, incl. Netlify).
+    // Redirects the browser to Google; on return, /auth/callback completes the
+    // session handoff via hydrateSessionFromRedirectUrl.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+    }
   };
 
   const heading = mode === "signup" ? "Create your account" : mode === "reset" ? "Reset your password" : "Welcome back";
