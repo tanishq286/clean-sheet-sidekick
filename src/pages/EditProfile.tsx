@@ -86,13 +86,13 @@ export default function EditProfile() {
           <Field label="Graduation"><Input value={draft.identity.graduation ?? ""} onChange={(e) => setIn("identity", "graduation", e.target.value)} placeholder="2026" /></Field>
           <Field label="Photo">
             <div className="flex items-center gap-3">
-              {draft.identity.photo_url && <img src={draft.identity.photo_url} className="w-16 h-16 rounded-full object-cover" />}
+              {draft.identity.photo_url && <img src={draft.identity.photo_url} alt="Profile photo preview" className="w-16 h-16 rounded-full object-cover" />}
               <Input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])} />
             </div>
           </Field>
           <Field label="Cover / background image (LinkedIn-style banner)">
             <div className="space-y-2">
-              {draft.identity.cover_url && <img src={draft.identity.cover_url} className="w-full h-32 object-cover rounded-md border" />}
+              {draft.identity.cover_url && <img src={draft.identity.cover_url} alt="Cover image preview" className="w-full h-32 object-cover rounded-md border" />}
               <Input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleCover(e.target.files[0])} />
             </div>
           </Field>

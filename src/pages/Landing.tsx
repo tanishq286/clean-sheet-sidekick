@@ -8,18 +8,18 @@ export default function Landing() {
   const { user } = useAuth();
   return (
     <div className="min-h-screen text-foreground" style={{ background: "oklch(98% 0.01 80)" }}>
-      <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
+      <header className="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 font-bold text-lg tracking-tight shrink-0">
           <span className="inline-block w-6 h-6 rounded-sm" style={{ background: "#6BCABA" }} />
           Founder<span style={{ color: "#FF6B35" }}>ID</span>
         </div>
-        <nav className="flex gap-3">
+        <nav className="flex gap-2 sm:gap-3 shrink-0">
           {user ? (
-            <Button asChild><Link to="/app">Open dashboard</Link></Button>
+            <Button size="sm" asChild><Link to="/app">Open dashboard</Link></Button>
           ) : (
             <>
-              <Button variant="ghost" asChild><Link to="/auth" onClick={() => rememberPostAuthRedirect("/app")}>Log in</Link></Button>
-              <Button asChild><Link to="/auth" onClick={() => rememberPostAuthRedirect("/app")}>Get started</Link></Button>
+              <Button size="sm" variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/auth" onClick={() => rememberPostAuthRedirect("/app")}>Log in</Link></Button>
+              <Button size="sm" asChild><Link to="/auth" onClick={() => rememberPostAuthRedirect("/app")}>Get started</Link></Button>
             </>
           )}
         </nav>
@@ -27,23 +27,23 @@ export default function Landing() {
 
       <main className="max-w-6xl mx-auto px-6 pt-12 pb-24">
         <div className="grid lg:grid-cols-[1.2fr_1fr] gap-12 items-center">
-          <div>
+          <div className="min-w-0">
             <div className="text-xs uppercase tracking-[0.2em] mb-6 text-muted-foreground">Founder Identity · for entrepreneurs &amp; student founders</div>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.02]">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.02] break-words">
               A founder profile <span style={{ color: "#FF6B35" }}>investors and mentors</span> can actually read.
             </h1>
             <p className="mt-6 text-xl text-muted-foreground max-w-xl">
               Six questions. Four templates. One link to share with the people deciding whether to back you, mentor you, or build with you.
             </p>
-            <div className="mt-8 flex gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Button size="lg" asChild><Link to="/auth" onClick={() => rememberPostAuthRedirect("/app")}>Start your profile</Link></Button>
               <Button size="lg" variant="outline" asChild><Link to="/style-guide">See the style guide</Link></Button>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative min-w-0">
             <img src={heroArt} alt="Founder identity built from layered cards" width={1280} height={1280}
-              className="w-full rounded-xl border shadow-sm" />
-            <div className="absolute -bottom-4 -left-4 bg-background border rounded-lg px-3 py-2 text-xs shadow-sm">
+              className="w-full max-w-full h-auto rounded-xl border shadow-sm" />
+            <div className="absolute -bottom-4 left-2 sm:-left-4 bg-background border rounded-lg px-3 py-2 text-xs shadow-sm max-w-[calc(100%-1rem)] truncate">
               <span className="font-semibold" style={{ color: "#6BCABA" }}>● Published</span> · founderid.app/u/your-name
             </div>
           </div>

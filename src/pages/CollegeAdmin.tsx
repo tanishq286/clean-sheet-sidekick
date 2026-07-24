@@ -272,7 +272,7 @@ export default function CollegeAdmin() {
                       <td className="px-4 py-3">{m.profile?.is_published ? "✓" : "—"}</td>
                       <td className="px-4 py-3 text-right">
                         {m.profile?.is_published && (
-                          <Link to={`/u/${m.profile.slug}`} className="text-xs underline mr-3" target="_blank">View</Link>
+                          <Link to={`/u/${m.profile.slug}`} className="text-xs underline mr-3" target="_blank" rel="noopener noreferrer">View</Link>
                         )}
                         <button className="text-xs text-muted-foreground hover:text-destructive" onClick={() => removeMember(m.id)}>Remove</button>
                       </td>

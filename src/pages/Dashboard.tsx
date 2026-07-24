@@ -91,7 +91,7 @@ function OverviewHeader({ profile }: { profile: FullProfile }) {
           </Button>
         )}
         <Button asChild variant="ghost" size="icon" title="View public profile">
-          <a href={`/u/${profile.slug}`} target="_blank" rel="noreferrer">
+          <a href={`/u/${profile.slug}`} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="h-4 w-4" />
           </a>
         </Button>
@@ -258,7 +258,7 @@ function ManageSection({ profile }: { profile: FullProfile }) {
         <a
           href={`/u/${profile.slug}`}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="border rounded-lg p-5 bg-card hover:shadow-md hover:-translate-y-0.5 transition-all sm:col-span-3 flex items-center justify-between"
         >
           <div>
