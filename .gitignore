@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# build artifacts / leftovers (must not be committed)
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env.local
+/legacy-portfolio-app/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
