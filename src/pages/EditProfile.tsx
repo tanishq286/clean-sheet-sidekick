@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   SKILL_TAGS, LOOKING_FOR_OPTIONS, PORTFOLIO_KINDS, STARTUP_STAGES,
   type SkillTag, type LookingFor, type Venture,
+  type Milestone, type PortfolioItem,
 } from "@/types/founder";
 import { SKILL_LABEL, LOOKING_LABEL, PORTFOLIO_LABEL } from "@/templates/shared/themeStyle";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -212,50 +213,93 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 // ===== Journey editor =====
+// Local state is the source of truth so typing is instant; changes persist to
+// Supabase on blur (not on every keystroke), which fixes the frozen inputs.
 function JourneyEditor({ profileId }: { profileId: string }) {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({
+  const { data: loaded } = useQuery({
     queryKey: ["journey", profileId],
-    queryFn: async () => (await supabase.from("journey_milestones").select("*").eq("profile_id", profileId).order("order_index")).data ?? [],
+    queryFn: async () =>
+      ((await supabase.from("journey_milestones").select("*").eq("profile_id", profileId).order("order_index")).data ??
+        []) as unknown as Milestone[],
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: ["journey", profileId] });
+  const [items, setItems] = useState<Milestone[] | null>(null);
+  useEffect(() => { if (loaded && items === null) setItems(loaded); }, [loaded, items]);
+  const list = items ?? [];
+
+  const patchLocal = (id: string, patch: Partial<Milestone>) =>
+    setItems((cur) => (cur ?? []).map((m) => (m.id === id ? { ...m, ...patch } : m)));
+
+  const persist = async (id: string, patch: Partial<Milestone>) => {
+    const { error } = await supabase.from("journey_milestones").update(patch as never).eq("id", id);
+    if (error) toast({ title: "Couldn't save milestone", description: error.message, variant: "destructive" });
+    else qc.invalidateQueries({ queryKey: ["my-profile"] });
+  };
+
+  const addItem = async () => {
+    const { data, error } = await supabase.from("journey_milestones")
+      .insert({ profile_id: profileId, year: new Date().getFullYear().toString(), title: "New milestone", order_index: list.length } as never)
+      .select().single();
+    if (error || !data) { toast({ title: "Couldn't add milestone", variant: "destructive" }); return; }
+    setItems((cur) => [...(cur ?? []), data as unknown as Milestone]);
+    qc.invalidateQueries({ queryKey: ["my-profile"] });
+  };
+
+  const removeItem = async (id: string) => {
+    setItems((cur) => (cur ?? []).filter((m) => m.id !== id));
+    await supabase.from("journey_milestones").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["my-profile"] });
+  };
+
   return (
     <div className="space-y-3">
-      {items.map((m: any, i: number) => (
+      {list.map((m) => (
         <div key={m.id} className="grid grid-cols-[80px_1fr_1fr_auto] gap-2 items-start">
-          <Input value={m.year} onChange={async (e) => { await supabase.from("journey_milestones").update({ year: e.target.value }).eq("id", m.id); refresh(); }} />
-          <Input value={m.title} onChange={async (e) => { await supabase.from("journey_milestones").update({ title: e.target.value }).eq("id", m.id); refresh(); }} placeholder="Title" />
-          <Input value={m.description ?? ""} onChange={async (e) => { await supabase.from("journey_milestones").update({ description: e.target.value }).eq("id", m.id); refresh(); }} placeholder="Description" />
-          <Button variant="ghost" onClick={async () => { await supabase.from("journey_milestones").delete().eq("id", m.id); refresh(); }}>×</Button>
+          <Input value={m.year ?? ""} placeholder="Year"
+            onChange={(e) => patchLocal(m.id, { year: e.target.value })}
+            onBlur={(e) => persist(m.id, { year: e.target.value })} />
+          <Input value={m.title ?? ""} placeholder="Title"
+            onChange={(e) => patchLocal(m.id, { title: e.target.value })}
+            onBlur={(e) => persist(m.id, { title: e.target.value })} />
+          <Input value={m.description ?? ""} placeholder="Description"
+            onChange={(e) => patchLocal(m.id, { description: e.target.value })}
+            onBlur={(e) => persist(m.id, { description: e.target.value })} />
+          <Button variant="ghost" onClick={() => removeItem(m.id)} aria-label="Remove milestone">×</Button>
         </div>
       ))}
-      <Button variant="outline" size="sm" onClick={async () => {
-        await supabase.from("journey_milestones").insert({ profile_id: profileId, year: new Date().getFullYear().toString(), title: "New milestone", order_index: items.length });
-        refresh();
-      }}>+ Add milestone</Button>
+      <Button variant="outline" size="sm" onClick={addItem}>+ Add milestone</Button>
     </div>
   );
 }
 
 // ===== Skills editor =====
+// Optimistic local toggle so the chips respond instantly, then persist.
 function SkillsEditor({ profileId }: { profileId: string }) {
   const qc = useQueryClient();
-  const { data: skills = [] } = useQuery({
+  const { data: loaded } = useQuery({
     queryKey: ["skills", profileId],
-    queryFn: async () => (await supabase.from("skills").select("*").eq("profile_id", profileId)).data ?? [],
+    queryFn: async () =>
+      ((await supabase.from("skills").select("tag").eq("profile_id", profileId)).data ?? []) as { tag: SkillTag }[],
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: ["skills", profileId] });
-  const has = (tag: SkillTag) => skills.some((s: any) => s.tag === tag);
+  const [active, setActive] = useState<SkillTag[] | null>(null);
+  useEffect(() => { if (loaded && active === null) setActive(loaded.map((s) => s.tag)); }, [loaded, active]);
+  const tags = active ?? [];
+  const has = (tag: SkillTag) => tags.includes(tag);
+
   const toggle = async (tag: SkillTag) => {
-    if (has(tag)) await supabase.from("skills").delete().eq("profile_id", profileId).eq("tag", tag);
-    else await supabase.from("skills").insert({ profile_id: profileId, tag });
-    refresh();
+    const isOn = has(tag);
+    setActive(isOn ? tags.filter((t) => t !== tag) : [...tags, tag]);
+    if (isOn) await supabase.from("skills").delete().eq("profile_id", profileId).eq("tag", tag);
+    else await supabase.from("skills").insert({ profile_id: profileId, tag } as never);
+    qc.invalidateQueries({ queryKey: ["my-profile"] });
   };
+
   return (
     <div className="flex flex-wrap gap-2">
       {SKILL_TAGS.map((tag) => (
         <button key={tag} type="button" onClick={() => toggle(tag)}
-          className={`px-3 py-1 rounded-full border text-sm ${has(tag) ? "bg-foreground text-background" : ""}`}>
+          aria-pressed={has(tag)}
+          className={`px-3 py-1 rounded-full border text-sm transition-colors ${has(tag) ? "bg-foreground text-background" : "hover:bg-muted"}`}>
           {SKILL_LABEL[tag]}
         </button>
       ))}
@@ -264,33 +308,66 @@ function SkillsEditor({ profileId }: { profileId: string }) {
 }
 
 // ===== Portfolio editor =====
+// Same pattern as Journey: instant local edits, persist on blur / selection.
 function PortfolioEditor({ profileId }: { profileId: string }) {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({
+  const { data: loaded } = useQuery({
     queryKey: ["portfolio", profileId],
-    queryFn: async () => (await supabase.from("portfolio_items").select("*").eq("profile_id", profileId).order("order_index")).data ?? [],
+    queryFn: async () =>
+      ((await supabase.from("portfolio_items").select("*").eq("profile_id", profileId).order("order_index")).data ??
+        []) as unknown as PortfolioItem[],
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: ["portfolio", profileId] });
+  const [items, setItems] = useState<PortfolioItem[] | null>(null);
+  useEffect(() => { if (loaded && items === null) setItems(loaded); }, [loaded, items]);
+  const list = items ?? [];
+
+  const patchLocal = (id: string, patch: Partial<PortfolioItem>) =>
+    setItems((cur) => (cur ?? []).map((p) => (p.id === id ? { ...p, ...patch } : p)));
+
+  const persist = async (id: string, patch: Partial<PortfolioItem>) => {
+    const { error } = await supabase.from("portfolio_items").update(patch as never).eq("id", id);
+    if (error) toast({ title: "Couldn't save item", description: error.message, variant: "destructive" });
+    else qc.invalidateQueries({ queryKey: ["my-profile"] });
+  };
+
+  const addItem = async () => {
+    const { data, error } = await supabase.from("portfolio_items")
+      .insert({ profile_id: profileId, kind: "website", title: "New item", order_index: list.length } as never)
+      .select().single();
+    if (error || !data) { toast({ title: "Couldn't add item", variant: "destructive" }); return; }
+    setItems((cur) => [...(cur ?? []), data as unknown as PortfolioItem]);
+    qc.invalidateQueries({ queryKey: ["my-profile"] });
+  };
+
+  const removeItem = async (id: string) => {
+    setItems((cur) => (cur ?? []).filter((p) => p.id !== id));
+    await supabase.from("portfolio_items").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["my-profile"] });
+  };
+
   return (
     <div className="space-y-3">
-      {items.map((p: any) => (
+      {list.map((p) => (
         <div key={p.id} className="border rounded-lg p-3 space-y-2">
           <div className="grid grid-cols-[160px_1fr_auto] gap-2">
             <select className="h-10 rounded-md border bg-background px-2 text-sm" value={p.kind}
-              onChange={async (e) => { await supabase.from("portfolio_items").update({ kind: e.target.value }).eq("id", p.id); refresh(); }}>
+              onChange={(e) => { patchLocal(p.id, { kind: e.target.value as PortfolioItem["kind"] }); persist(p.id, { kind: e.target.value as PortfolioItem["kind"] }); }}>
               {PORTFOLIO_KINDS.map((k) => <option key={k} value={k}>{PORTFOLIO_LABEL[k]}</option>)}
             </select>
-            <Input value={p.title} onChange={async (e) => { await supabase.from("portfolio_items").update({ title: e.target.value }).eq("id", p.id); refresh(); }} placeholder="Title" />
-            <Button variant="ghost" onClick={async () => { await supabase.from("portfolio_items").delete().eq("id", p.id); refresh(); }}>×</Button>
+            <Input value={p.title ?? ""} placeholder="Title"
+              onChange={(e) => patchLocal(p.id, { title: e.target.value })}
+              onBlur={(e) => persist(p.id, { title: e.target.value })} />
+            <Button variant="ghost" onClick={() => removeItem(p.id)} aria-label="Remove item">×</Button>
           </div>
-          <Input value={p.url ?? ""} placeholder="https://… (optional)" onChange={async (e) => { await supabase.from("portfolio_items").update({ url: e.target.value }).eq("id", p.id); refresh(); }} />
-          <Textarea rows={2} value={p.description ?? ""} placeholder="Description" onChange={async (e) => { await supabase.from("portfolio_items").update({ description: e.target.value }).eq("id", p.id); refresh(); }} />
+          <Input value={p.url ?? ""} placeholder="https://… (optional)"
+            onChange={(e) => patchLocal(p.id, { url: e.target.value })}
+            onBlur={(e) => persist(p.id, { url: e.target.value })} />
+          <Textarea rows={2} value={p.description ?? ""} placeholder="Description"
+            onChange={(e) => patchLocal(p.id, { description: e.target.value })}
+            onBlur={(e) => persist(p.id, { description: e.target.value })} />
         </div>
       ))}
-      <Button variant="outline" size="sm" onClick={async () => {
-        await supabase.from("portfolio_items").insert({ profile_id: profileId, kind: "website", title: "New item", order_index: items.length });
-        refresh();
-      }}>+ Add portfolio item</Button>
+      <Button variant="outline" size="sm" onClick={addItem}>+ Add portfolio item</Button>
     </div>
   );
 }

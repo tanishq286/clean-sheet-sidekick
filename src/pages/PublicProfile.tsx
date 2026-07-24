@@ -1,15 +1,28 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { fetchProfileBySlug } from "@/lib/profile";
+import { fetchProfileBySlug, fetchMyProfile } from "@/lib/profile";
+import { useAuth } from "@/hooks/useAuth";
 import { getTemplate } from "@/templates/registry";
 import HabitsBlock from "@/templates/shared/HabitsBlock";
 
 export default function PublicProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
   const { data: profile, isLoading } = useQuery({
-    queryKey: ["public-profile", slug],
-    queryFn: () => fetchProfileBySlug(slug!),
+    queryKey: ["public-profile", slug, user?.id ?? null],
+    queryFn: async () => {
+      const published = await fetchProfileBySlug(slug!);
+      if (published) return published;
+      // Owner preview: the public RPC only returns published profiles, so let a
+      // signed-in owner view their own draft (this is why "View public profile"
+      // looked broken before publishing).
+      if (user) {
+        const mine = await fetchMyProfile(user.id);
+        if (mine && mine.slug === slug) return mine;
+      }
+      return null;
+    },
     enabled: !!slug,
   });
 
@@ -41,6 +54,11 @@ export default function PublicProfile() {
   const Template = getTemplate(profile.template_id).Component;
   return (
     <>
+      {!profile.is_published && (
+        <div className="sticky top-0 z-50 flex items-center justify-center gap-2 bg-amber-500 px-4 py-1.5 text-center text-sm font-medium text-amber-950">
+          Preview — this profile isn&apos;t published yet. Publish it from your dashboard to share the link.
+        </div>
+      )}
       <Template profile={profile} />
       {profile.theme?.display_habits && <HabitsBlock slug={profile.slug} />}
     </>
