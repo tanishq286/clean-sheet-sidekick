@@ -19,23 +19,30 @@ and **Supabase** steps are one-time dashboard actions only you can do.
 - [ ] **Build command:** `npm run build`
 - [ ] **Publish directory:** `dist`
       (auto-detected from `netlify.toml`; confirm they match.)
-- [ ] **Environment variables** (Site settings → Environment variables):
+- [x] **Environment variables** (Site settings → Environment variables) —
+      set to project `ytymuqlajzmysujgrksc` (your own account, not the
+      earlier friend-owned project):
 
       | Key                              | Value                                                        |
       | -------------------------------- | ------------------------------------------------------------ |
-      | `VITE_SUPABASE_URL`              | `https://lnhsiiqbkoncatxlriss.supabase.co`                   |
-      | `VITE_SUPABASE_PUBLISHABLE_KEY`  | the project's anon / publishable key (also in the repo `.env`) |
+      | `VITE_SUPABASE_URL`              | `https://ytymuqlajzmysujgrksc.supabase.co`                   |
+      | `VITE_SUPABASE_PROJECT_ID`       | `ytymuqlajzmysujgrksc`                                        |
+      | `VITE_SUPABASE_PUBLISHABLE_KEY`  | the project's publishable key (also in the repo `.env`)      |
 
-      Optional (leave unset unless you use them): `VITE_SUPABASE_PROJECT_ID`,
-      `VITE_PROFILE_DOMAIN`, `VITE_HABITS_API_BASE`.
+      ⚠️ **Netlify's own site-level env vars override the repo's `.env` file
+      at build time.** If you ever change the Supabase project again, update
+      it in **both** places — Site settings → Environment variables **and**
+      the repo `.env` — or the site will silently keep building against the
+      old project.
 
 - [ ] After changing settings, **Deploys → Trigger deploy → Clear cache and
-      deploy site**, then hard-refresh the browser.
+      deploy site**, then hard-refresh the browser (env var changes only take
+      effect on the *next* build, never retroactively).
 
 ## 3. Supabase — required for Google sign-in on this domain ⚠️
 
 Google/OAuth login only works on domains that are explicitly allow-listed.
-In the Supabase dashboard for project `lnhsiiqbkoncatxlriss`:
+In the Supabase dashboard for project `ytymuqlajzmysujgrksc`:
 
 - [ ] **Authentication → URL Configuration → Site URL:**
       set to `https://portfoliobuildersiev.netlify.app`
