@@ -2,9 +2,31 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
-# SPA fallback: every route serves index.html so client-side routes
+[functions]
+  node_bundler = "esbuild"
+  # resvg ships a .wasm binary that esbuild won't trace automatically — without
+  # this it is missing at runtime and every OG render falls back to the static
+  # image. satori/resvg stay external so their native/wasm assets survive.
+  external_node_modules = ["satori", "@resvg/resvg-wasm"]
+  included_files = ["node_modules/@resvg/resvg-wasm/index_bg.wasm"]
+
+# Dynamic OG image. Declared before the SPA catch-all so /* doesn't swallow it.
+[[redirects]]
+  from = "/api/og"
+  to = "/.netlify/functions/og"
+  status = 200
+
+[[redirects]]
+  from = "/og-image.png"
+  to = "/.netlify/functions/og"
+  status = 200
+
+# SPA fallback: every remaining route serves index.html so client-side routes
 # (/app, /app/edit, /u/:slug, …) don't 404 on refresh or deep-link.
+# Real files in dist/ — llms.txt, llms-full.txt, llms/*.txt — are matched
+# before this rule, so AI crawlers receive raw Markdown with no JS execution.
 [[redirects]]
   from = "/*"
   to = "/index.html"

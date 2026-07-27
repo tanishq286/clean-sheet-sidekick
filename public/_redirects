@@ -1,1 +1,10 @@
-/*    /index.html   200
+# Dynamic OG image generator (Netlify Function).
+# Must be declared before the SPA catch-all below, otherwise /* swallows it.
+/api/og            /.netlify/functions/og    200
+/og-image.png      /.netlify/functions/og    200
+
+# SPA fallback: every remaining route serves index.html so client-side routes
+# (/app, /app/edit, /u/:slug) don't 404 on refresh or deep-link.
+# Real files in dist/ (llms.txt, llms-full.txt, llms/*.txt, assets) are served
+# ahead of this rule, so AI crawlers get raw Markdown with no JS execution.
+/*                 /index.html               200

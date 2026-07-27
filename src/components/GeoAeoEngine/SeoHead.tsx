@@ -54,16 +54,27 @@ export default function SeoHead({ profile }: { profile: FullProfile }) {
     upsertMeta("description", description);
     upsertCanonical(url);
 
+    // Dynamically rendered 1200x630 card from the /api/og Netlify Function.
+    const ogImage = `${origin}/api/og?${new URLSearchParams({
+      name: name,
+      role: profile.identity.headline || (profile.founder.current_venture ? `Founder, ${profile.founder.current_venture}` : "Founder"),
+      title: description,
+      theme: profile.theme?.accent ?? "#FF6B35",
+    }).toString()}`;
+
     upsertMeta("og:type", "profile", "property");
     upsertMeta("og:title", title, "property");
     upsertMeta("og:description", description, "property");
     upsertMeta("og:url", url, "property");
-    if (profile.identity.photo_url) upsertMeta("og:image", profile.identity.photo_url, "property");
+    upsertMeta("og:image", ogImage, "property");
+    upsertMeta("og:image:width", "1200", "property");
+    upsertMeta("og:image:height", "630", "property");
+    upsertMeta("og:image:alt", `${name} — founder profile card`, "property");
 
-    upsertMeta("twitter:card", profile.identity.photo_url ? "summary_large_image" : "summary");
+    upsertMeta("twitter:card", "summary_large_image");
     upsertMeta("twitter:title", title);
     upsertMeta("twitter:description", description);
-    if (profile.identity.photo_url) upsertMeta("twitter:image", profile.identity.photo_url);
+    upsertMeta("twitter:image", ogImage);
 
     // Explicitly welcome AI crawlers on published profiles.
     upsertMeta("robots", profile.is_published ? "index, follow, max-snippet:-1, max-image-preview:large" : "noindex");
