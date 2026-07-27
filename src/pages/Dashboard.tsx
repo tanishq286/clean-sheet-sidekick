@@ -11,6 +11,7 @@ import { getTemplate } from "@/templates/registry";
 import { STAGE_LABEL } from "@/templates/shared/themeStyle";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import AeoScoreCard from "@/components/GeoAeoEngine/AeoScoreCard";
 import type { FullProfile } from "@/types/founder";
 
 export default function Dashboard() {
@@ -32,6 +33,10 @@ export default function Dashboard() {
         <OverviewHeader profile={profile} />
         <CompletionSection profile={profile} />
         <ContentSection profile={profile} />
+        <section>
+          <SectionHeading eyebrow="Step 3" title="AI discoverability" />
+          <AeoScoreCard profile={profile} />
+        </section>
         <ManageSection profile={profile} />
       </div>
     </AppShell>
@@ -237,7 +242,7 @@ function ManageSection({ profile }: { profile: FullProfile }) {
 
   return (
     <section>
-      <SectionHeading eyebrow="Step 3" title="Manage your profile" />
+      <SectionHeading eyebrow="Step 4" title="Manage your profile" />
       <div className="grid sm:grid-cols-3 gap-4">
         {actions.map(({ to, icon: Icon, title, description, swatch }) => (
           <Link

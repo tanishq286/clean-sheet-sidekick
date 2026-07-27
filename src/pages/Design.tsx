@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import HabitsBlock from "@/templates/shared/HabitsBlock";
 import { DEMO_HABITS } from "@/lib/habits";
+import ContactSection from "@/components/ContactSection";
+import { useState } from "react";
 
 const ACCENTS = ["#FF6B35", "#6BCABA", "#3B82F6", "#A855F7", "#10B981", "#F59E0B", "#EF4444", "#111827"];
 
@@ -17,6 +19,7 @@ export default function Design() {
   const { user } = useAuth();
   const { data: profile } = useMyProfile();
   const update = useUpdateProfile();
+  const [showContact, setShowContact] = useState(true);
   const { data: full } = useQuery({
     queryKey: ["full-profile", user?.id, profile?.template_id, profile?.theme],
     queryFn: () => fetchMyProfile(user!.id),
@@ -70,6 +73,17 @@ export default function Design() {
           </div>
 
           <div>
+            <h2 className="font-semibold mb-3">Contact section</h2>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={showContact} onChange={(e) => setShowContact(e.target.checked)} />
+              Preview contact form below profile
+            </label>
+            <div className="text-xs text-muted-foreground mt-2">
+              Runs in demo mode here — submissions are simulated so you can test the flow safely.
+            </div>
+          </div>
+
+          <div>
             <h2 className="font-semibold mb-3">Habits</h2>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={!!profile.theme.display_habits}
@@ -86,6 +100,15 @@ export default function Design() {
           <div className="m-6 border rounded-xl overflow-hidden bg-background shadow-sm">
             <Template profile={full} />
             {profile.theme.display_habits && <HabitsBlock slug={profile.slug} demo={DEMO_HABITS} />}
+            {showContact && (
+              <ContactSection
+                name={full.identity?.name}
+                email={full.contact?.email}
+                slug={profile.slug}
+                accent={profile.theme.accent}
+                demoMode
+              />
+            )}
           </div>
         </div>
       </div>
