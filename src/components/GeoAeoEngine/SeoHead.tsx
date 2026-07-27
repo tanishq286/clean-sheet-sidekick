@@ -75,6 +75,9 @@ export default function SeoHead({ profile }: { profile: FullProfile }) {
     upsertMeta("twitter:title", title);
     upsertMeta("twitter:description", description);
     upsertMeta("twitter:image", ogImage);
+    // Without this the site-level twitter:url from index.html would leak onto
+    // every profile page, pointing shares back at the homepage.
+    upsertMeta("twitter:url", url);
 
     // Explicitly welcome AI crawlers on published profiles.
     upsertMeta("robots", profile.is_published ? "index, follow, max-snippet:-1, max-image-preview:large" : "noindex");
