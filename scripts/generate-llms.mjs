@@ -61,14 +61,23 @@ async function fetchPublishedProfiles() {
   const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) return { profiles: [], reason: "no Supabase credentials in env" };
 
-  const headers = { apikey: key, Accept: "application/json" };
-  const get = async (path) => {
-    const res = await fetch(`${url}/rest/v1/${path}`, { headers, signal: AbortSignal.timeout(15000) });
+  const headers = {
+    apikey: key,
+    Authorization: `Bearer ${key}`,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+  const get = async (path, init = {}) => {
+    const res = await fetch(`${url}/rest/v1/${path}`, { headers, ...init, signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error(`${path} -> ${res.status}`);
     return res.json();
   };
 
-  const profiles = await get("profiles?is_published=eq.true&select=*");
+  // `profiles` has no anon SELECT policy, so querying the table directly with
+  // the publishable key returns zero rows (RLS filters silently — no error).
+  // list_public_profiles is SECURITY DEFINER and strips the contact email,
+  // which is what we want in files handed straight to AI crawlers.
+  const profiles = await get("rpc/list_public_profiles", { method: "POST", body: "{}" });
   if (profiles.length === 0) return { profiles: [], reason: "no published profiles yet" };
 
   const ids = profiles.map((p) => `"${p.id}"`).join(",");
