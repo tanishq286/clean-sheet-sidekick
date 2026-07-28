@@ -1,6 +1,8 @@
 import type { TemplateProps } from "../types";
 import { motion } from "framer-motion";
-import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
+import Milestones from "@/components/Milestones";
+import Portfolio from "@/components/Portfolio";
+import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 type VentureCard = {
   name?: string | null;
@@ -73,7 +75,7 @@ export default function ShowcaseTemplate({ profile }: TemplateProps) {
             </div>
             <div className="grid md:grid-cols-2 gap-px bg-white/10 border border-white/10">
               {ventures.map((v, i) => (
-                <motion.article key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                <motion.article key={v.id ?? `venture-${i}`} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                   className="bg-[#0b0b0d] p-8 md:p-10 relative group hover:bg-[#15151a] transition">
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-xs uppercase tracking-[0.3em] text-neutral-500">
@@ -116,18 +118,7 @@ export default function ShowcaseTemplate({ profile }: TemplateProps) {
           <section>
             <div className="text-xs uppercase tracking-[0.4em] mb-3" style={{ color: "var(--accent)" }}>Journey</div>
             <h2 className="text-4xl md:text-5xl font-black mb-10">How I got here</h2>
-            <ol className="space-y-0">
-              {milestones.map((m, i) => (
-                <motion.li key={m.id} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                  className="grid md:grid-cols-[120px_1fr] gap-6 py-6 border-t border-white/10 last:border-b">
-                  <div className="text-3xl font-black" style={{ color: "var(--accent)" }}>{m.year}</div>
-                  <div>
-                    <div className="text-xl font-semibold mb-1">{m.title}</div>
-                    {m.description && <p className="text-neutral-400 leading-relaxed">{m.description}</p>}
-                  </div>
-                </motion.li>
-              ))}
-            </ol>
+            <Milestones milestones={milestones} showHeader={false} />
           </section>
         )}
 
@@ -158,16 +149,7 @@ export default function ShowcaseTemplate({ profile }: TemplateProps) {
           <section>
             <div className="text-xs uppercase tracking-[0.4em] mb-3" style={{ color: "var(--accent)" }}>Selected work</div>
             <h2 className="text-4xl md:text-5xl font-black mb-10">Portfolio</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {portfolio.map((p) => (
-                <a key={p.id} href={p.url ?? p.file_url ?? "#"} target="_blank" rel="noreferrer"
-                  className="group block p-6 border border-white/10 hover:border-white/60 hover:bg-white/5 transition min-h-[180px]">
-                  <div className="text-[10px] uppercase tracking-widest mb-3" style={{ color: "var(--accent)" }}>{PORTFOLIO_LABEL[p.kind]}</div>
-                  <div className="text-2xl font-bold leading-tight group-hover:underline">{p.title}</div>
-                  {p.description && <p className="mt-3 text-sm text-neutral-400 leading-relaxed line-clamp-4">{p.description}</p>}
-                </a>
-              ))}
-            </div>
+            <Portfolio portfolio={portfolio} showHeader={false} />
           </section>
         )}
 

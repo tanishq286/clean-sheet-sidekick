@@ -6,6 +6,7 @@ import { getTemplate } from "@/templates/registry";
 import HabitsBlock from "@/templates/shared/HabitsBlock";
 import SeoHead from "@/components/GeoAeoEngine/SeoHead";
 import ContactSection from "@/components/ContactSection";
+import SoundToggle from "@/components/SoundToggle";
 
 export default function PublicProfile() {
   const { slug } = useParams<{ slug: string }>();
@@ -51,6 +52,11 @@ export default function PublicProfile() {
         </div>
       )}
       <SeoHead profile={profile} />
+      {/* Floating so it works across all six templates without any of them
+          needing to reserve a slot for it. */}
+      <div className="fixed bottom-4 right-4 z-40">
+        <SoundToggle className="border-current/30 bg-background/80 backdrop-blur-sm" />
+      </div>
       <Template profile={profile} />
       {profile.theme?.display_habits && <HabitsBlock slug={profile.slug} />}
       <ContactSection

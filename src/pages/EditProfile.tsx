@@ -41,10 +41,23 @@ export default function EditProfile() {
     toast({ title: "Saved" });
   };
 
-  const additional: Venture[] = draft.founder.additional_ventures ?? [];
+  // Ventures predate having an id, so backfill one for any legacy row. Without
+  // a stable key React re-keys this list by position: removing a venture makes
+  // it reuse the surviving DOM nodes in place, and the inputs below the removed
+  // row end up showing the previous row's text.
+  const additional: Venture[] = (draft.founder.additional_ventures ?? []).map((v, i) => ({
+    ...v,
+    id: v.id ?? `venture-legacy-${i}`,
+  }));
   const setVentures = (list: Venture[]) => setIn("founder", "additional_ventures", list);
-  const updateVenture = (i: number, patch: Partial<Venture>) =>
-    setVentures(additional.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
+  const updateVenture = (id: string, patch: Partial<Venture>) =>
+    setVentures(additional.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+  const removeVenture = (id: string) => setVentures(additional.filter((v) => v.id !== id));
+
+  const newVentureId = () =>
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `venture-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const toggleLooking = (l: LookingFor) => {
     const list: LookingFor[] = draft.looking_for ?? [];
@@ -121,31 +134,31 @@ export default function EditProfile() {
           {additional.length > 0 && (
             <div className="space-y-4 pt-2">
               <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Additional ventures</div>
-              {additional.map((v, i) => (
-                <div key={i} className="border rounded-lg p-4 space-y-3 relative">
+              {additional.map((v) => (
+                <div key={v.id} className="border rounded-lg p-4 space-y-3 relative">
                   <button type="button" aria-label="Remove venture"
                     className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
-                    onClick={() => setVentures(additional.filter((_, idx) => idx !== i))}>×</button>
-                  <Field label="Venture name"><Input value={v.name ?? ""} onChange={(e) => updateVenture(i, { name: e.target.value })} /></Field>
+                    onClick={() => removeVenture(v.id!)}>×</button>
+                  <Field label="Venture name"><Input value={v.name ?? ""} onChange={(e) => updateVenture(v.id!, { name: e.target.value })} /></Field>
                   <div className="grid grid-cols-2 gap-4">
-                    <Field label="Industry"><Input value={v.industry ?? ""} onChange={(e) => updateVenture(i, { industry: e.target.value })} /></Field>
+                    <Field label="Industry"><Input value={v.industry ?? ""} onChange={(e) => updateVenture(v.id!, { industry: e.target.value })} /></Field>
                     <Field label="Stage">
                       <select className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                        value={v.stage ?? ""} onChange={(e) => updateVenture(i, { stage: e.target.value as any })}>
+                        value={v.stage ?? ""} onChange={(e) => updateVenture(v.id!, { stage: e.target.value as any })}>
                         <option value="">Select…</option>
                         {STARTUP_STAGES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                       </select>
                     </Field>
                   </div>
-                  <Field label="Problem"><Textarea rows={2} value={v.problem ?? ""} onChange={(e) => updateVenture(i, { problem: e.target.value })} /></Field>
-                  <Field label="Mission"><Input value={v.mission ?? ""} onChange={(e) => updateVenture(i, { mission: e.target.value })} /></Field>
+                  <Field label="Problem"><Textarea rows={2} value={v.problem ?? ""} onChange={(e) => updateVenture(v.id!, { problem: e.target.value })} /></Field>
+                  <Field label="Mission"><Input value={v.mission ?? ""} onChange={(e) => updateVenture(v.id!, { mission: e.target.value })} /></Field>
                 </div>
               ))}
             </div>
           )}
 
           <Button type="button" variant="outline" size="sm"
-            onClick={() => setVentures([...additional, { name: "", industry: "", stage: undefined, problem: "", mission: "" }])}>
+            onClick={() => setVentures([...additional, { id: newVentureId(), name: "", industry: "", stage: undefined, problem: "", mission: "" }])}>
             + Add another venture
           </Button>
         </Section>

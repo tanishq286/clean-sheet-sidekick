@@ -59,7 +59,7 @@ export default function ResumeTemplate({ profile }: TemplateProps) {
               <div className="mt-8 space-y-4">
                 <div className="text-[10px] uppercase tracking-[0.3em] opacity-60">Also building</div>
                 {founder.additional_ventures!.map((v, i) => (
-                  <div key={i} className="border-l-2 pl-4" style={{ borderColor: "var(--accent)" }}>
+                  <div key={v.id ?? `venture-${i}`} className="border-l-2 pl-4" style={{ borderColor: "var(--accent)" }}>
                     <div className="font-['Archivo_Black'] text-xl uppercase">{v.name || "Untitled"}</div>
                     <div className="text-xs uppercase tracking-wider opacity-60">{[v.industry, v.stage ? STAGE_LABEL[v.stage] : null].filter(Boolean).join(" · ")}</div>
                     {v.problem && <p className="mt-2 text-sm text-neutral-700 leading-relaxed">{v.problem}</p>}

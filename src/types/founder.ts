@@ -50,6 +50,9 @@ export interface FounderBlock {
 }
 
 export interface Venture {
+  /** Stable React key. Optional because rows created before this existed
+   *  have none; EditProfile backfills them on first edit. */
+  id?: string;
   name?: string;
   industry?: string;
   stage?: StartupStage;

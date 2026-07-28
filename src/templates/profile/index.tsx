@@ -1,6 +1,8 @@
 import type { TemplateProps } from "../types";
 import { motion } from "framer-motion";
-import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
+import Milestones from "@/components/Milestones";
+import Portfolio from "@/components/Portfolio";
+import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 type VentureCard = {
   name?: string | null;
@@ -88,7 +90,7 @@ export default function ProfileTemplate({ profile }: TemplateProps) {
               <Card title="Ventures" badge={`${ventures.length}`}>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {ventures.map((v, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                    <motion.div key={v.id ?? `venture-${i}`} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                       className="relative rounded-xl border border-neutral-200 p-5 hover:shadow-md transition bg-white">
                       {v.primary && (
                         <span className="absolute top-3 right-3 text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full font-semibold"
@@ -127,34 +129,13 @@ export default function ProfileTemplate({ profile }: TemplateProps) {
 
             {milestones.length > 0 && (
               <Card title="Journey">
-                <ol className="space-y-5">
-                  {milestones.map((m) => (
-                    <li key={m.id} className="grid grid-cols-[64px_1fr] gap-4">
-                      <div className="text-sm font-bold tabular-nums pt-0.5" style={{ color: "var(--accent)" }}>{m.year}</div>
-                      <div className="border-l-2 border-neutral-200 pl-4 -ml-2">
-                        <div className="font-semibold">{m.title}</div>
-                        {m.description && <p className="text-sm text-neutral-600 leading-relaxed mt-1">{m.description}</p>}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+                <Milestones milestones={milestones} showHeader={false} />
               </Card>
             )}
 
             {portfolio.length > 0 && (
               <Card title="Featured work">
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {portfolio.map((p) => (
-                    <a key={p.id} href={p.url ?? p.file_url ?? "#"} target="_blank" rel="noreferrer"
-                      className="block rounded-lg border border-neutral-200 p-4 hover:border-neutral-400 hover:shadow-sm transition group">
-                      <div className="text-[10px] uppercase tracking-widest font-semibold mb-2" style={{ color: "var(--accent)" }}>
-                        {PORTFOLIO_LABEL[p.kind]}
-                      </div>
-                      <div className="font-semibold leading-snug group-hover:underline">{p.title}</div>
-                      {p.description && <p className="text-sm text-neutral-600 mt-2 line-clamp-3">{p.description}</p>}
-                    </a>
-                  ))}
-                </div>
+                <Portfolio portfolio={portfolio} showHeader={false} />
               </Card>
             )}
           </div>
