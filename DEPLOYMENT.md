@@ -162,4 +162,7 @@ Notes:
 - `test:routes` reports **SKIP**, not FAIL, for `/u/:slug` when the host cannot
   reach Supabase. A suite that cannot tell "app broken" from "no network here"
   is worse than none.
-- Set `CHROMIUM_PATH` if Playwright's browser is not on the default path.
+- First time on a machine: `npm install && npx playwright install chromium`.
+  The browser is a separate download from the npm package.
+- Set `CHROMIUM_PATH` only if you want a browser other than the one Playwright
+  installed (for example an existing Chrome).
