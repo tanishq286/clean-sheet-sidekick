@@ -70,13 +70,16 @@ try {
   await waitForServer();
   console.log(`preview ready at ${BASE}\n`);
 
-  // Run both suites even if the first fails — one report beats two round trips.
-  const routes = await run("smoke-routes.mjs");
-  console.log("");
-  const templates = await run("sweep-templates.mjs");
+  // Run every suite even if an earlier one fails — one full report beats
+  // discovering the next problem on the next round trip.
+  const codes = [];
+  for (const script of ["smoke-routes.mjs", "smoke-authed.mjs", "sweep-templates.mjs"]) {
+    codes.push(await run(script));
+    console.log("");
+  }
 
   stop();
-  process.exit(routes || templates ? 1 : 0);
+  process.exit(codes.some(Boolean) ? 1 : 0);
 } catch (err) {
   console.error(String(err));
   stop();

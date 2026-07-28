@@ -132,3 +132,34 @@ pointing at a domain that isn't serving the site yet.
       or Google sign-in breaks on the new domain.
 - [ ] **7. Google Search Console:** add `iev.mba` as a property, verify it, and
       submit the sitemap/URLs. Nothing gets crawled faster than you ask for it.
+
+## 7. Verifying the app (automated)
+
+Two commands. `verify` is the fast gate; `verify:full` adds a real browser.
+
+```bash
+npm run verify        # typecheck (tsc -b) + eslint + production build
+npm run verify:full   # the above, then 64 browser checks
+```
+
+`verify:full` starts and stops its own preview server — a stale one silently
+serving an old build had been producing results that looked real and weren't.
+
+| Suite | Covers |
+| --- | --- |
+| `test:routes` | 12 public routes: blank screens, uncaught errors, failed same-origin requests, 390px overflow, expected content |
+| `test:authed` | 16 signed-in checks: dashboard, editor, design, export, admin, college, plus the account-deletion gate |
+| `test:templates` | all 36 designs: render, contrast, milestone toggle, portfolio drawer, Escape-close |
+
+Notes:
+
+- `npm run typecheck` runs `tsc -b`, **not** `tsc --noEmit`. The root tsconfig
+  has `"files": []` with project references, so `--noEmit` type-checks nothing
+  and always exits 0 — it once passed syntactically invalid JSX.
+- `test:authed` stubs Supabase and injects a session, so it verifies the UI
+  rather than the backend and runs with no network. Backend rules are covered
+  by the RLS probes in `supabase/migrations/`.
+- `test:routes` reports **SKIP**, not FAIL, for `/u/:slug` when the host cannot
+  reach Supabase. A suite that cannot tell "app broken" from "no network here"
+  is worse than none.
+- Set `CHROMIUM_PATH` if Playwright's browser is not on the default path.

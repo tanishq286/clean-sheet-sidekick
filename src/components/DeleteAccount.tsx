@@ -7,38 +7,69 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
 /**
- * Permanent account deletion.
+ * Permanent account deletion, gated on proving who you are.
  *
- * Deliberately high-friction: collapsed by default, and the button stays
- * disabled until the exact word is typed. This is the only irreversible action
- * in the product, so a stray tap must not be able to reach it.
+ * Typing DELETE stops an accidental tap, but it does nothing against someone
+ * sitting at an unlocked, already-signed-in browser. Re-authentication is what
+ * actually protects the account, so the destructive call only runs after the
+ * identity is re-proved.
  *
- * Order matters. Stored files are removed first, because Postgres refuses
- * direct deletes from storage.objects and the RPC therefore cannot reach them
- * — once the auth row is gone the client has no session left to clean up with,
- * and the assets would be orphaned forever.
+ * Two paths, because the app offers two ways in:
+ *  - password accounts re-enter their password, verified by signing in again
+ *  - Google-only accounts have no password to check, so they retype their
+ *    email address exactly. Weaker, but honest — asking for a password that
+ *    does not exist would just produce "invalid credentials" and confusion.
  */
 export default function DeleteAccount() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
+  const [secret, setSecret] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const ready = confirm.trim().toUpperCase() === "DELETE";
+  // Supabase reports every linked provider here; "email" means a password exists.
+  const providers = (user?.app_metadata?.providers as string[] | undefined) ?? [
+    user?.app_metadata?.provider as string | undefined,
+  ].filter(Boolean) as string[];
+  const hasPassword = providers.includes("email");
+  const email = user?.email ?? "";
+
+  const typedDelete = confirm.trim().toUpperCase() === "DELETE";
+  const identityGiven = hasPassword
+    ? secret.length > 0
+    : secret.trim().toLowerCase() === email.toLowerCase() && email.length > 0;
+  const ready = typedDelete && identityGiven;
+
+  const reauthenticate = async (): Promise<string | null> => {
+    if (!hasPassword) {
+      return secret.trim().toLowerCase() === email.toLowerCase()
+        ? null
+        : "That email address doesn't match this account.";
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password: secret });
+    return error ? "That password isn't right." : null;
+  };
 
   const run = async () => {
     if (!ready || !user) return;
     setBusy(true);
     try {
+      const authProblem = await reauthenticate();
+      if (authProblem) {
+        toast({ title: "Couldn't verify it's you", description: authProblem, variant: "destructive" });
+        setBusy(false);
+        return;
+      }
+
       // Best effort: a storage failure must not block the deletion itself,
       // otherwise a user could be trapped in an account they asked to remove.
+      // It runs first because the RPC cannot reach storage.objects and, once
+      // the auth row is gone, there is no session left to clean up with.
       try {
         const { data: files } = await supabase.storage.from("profile-assets").list(user.id);
         if (files?.length) {
-          await supabase.storage
-            .from("profile-assets")
-            .remove(files.map((f) => `${user.id}/${f.name}`));
+          await supabase.storage.from("profile-assets").remove(files.map((f) => `${user.id}/${f.name}`));
         }
       } catch {
         /* orphaned assets are recoverable; a blocked deletion is not */
@@ -61,6 +92,12 @@ export default function DeleteAccount() {
     }
   };
 
+  const reset = () => {
+    setOpen(false);
+    setConfirm("");
+    setSecret("");
+  };
+
   return (
     <div className="rounded-xl border border-destructive/30 bg-destructive/[0.03] p-6">
       <h3 className="font-semibold text-destructive">Delete account</h3>
@@ -74,7 +111,19 @@ export default function DeleteAccount() {
           Delete my account
         </Button>
       ) : (
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 max-w-xs space-y-3">
+          <label className="block text-sm">
+            {hasPassword ? "Confirm your password" : "Retype your email address"}
+            <Input
+              type={hasPassword ? "password" : "email"}
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              placeholder={hasPassword ? "Your password" : email}
+              autoComplete={hasPassword ? "current-password" : "off"}
+              className="mt-1.5"
+            />
+          </label>
+
           <label className="block text-sm">
             Type <span className="font-mono font-semibold">DELETE</span> to confirm
             <Input
@@ -82,22 +131,15 @@ export default function DeleteAccount() {
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="DELETE"
               autoComplete="off"
-              className="mt-1.5 max-w-xs"
+              className="mt-1.5"
             />
           </label>
+
           <div className="flex flex-wrap gap-2">
             <Button variant="destructive" size="sm" disabled={!ready || busy} onClick={run}>
               {busy ? "Deleting…" : "Permanently delete"}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={busy}
-              onClick={() => {
-                setOpen(false);
-                setConfirm("");
-              }}
-            >
+            <Button variant="ghost" size="sm" disabled={busy} onClick={reset}>
               Cancel
             </Button>
           </div>
