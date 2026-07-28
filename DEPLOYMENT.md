@@ -99,3 +99,36 @@ What ships, and what each piece is for:
 in-app `<SeoHead>` therefore run the *same* code — they can't drift. The file is
 committed so a deploy never depends on that step succeeding; run
 `npm run generate:edge-seo` after editing the schema builders.
+
+## 6. Moving to a custom domain (iev.mba)
+
+Absolute URLs are no longer hardcoded. `vite.config.ts` substitutes
+`__SITE_URL__` in `index.html` from `SITE_URL || URL`, and Netlify sets `URL`
+to the project's **primary** domain — so canonical, `og:url`, and the Twitter
+tags follow the domain automatically on the next deploy. `SeoHead`, the edge
+prerender, and `/api/og` already derive their origin from the request, and
+`scripts/generate-llms.mjs` reads the same env vars.
+
+Order matters here — doing step 3 before step 2 publishes a canonical tag
+pointing at a domain that isn't serving the site yet.
+
+- [ ] **1. Netlify → Domain management → Add a domain** → `iev.mba`.
+      Netlify shows the DNS records it wants.
+- [ ] **2. At the registrar**, repoint the domain away from the old project:
+      - apex `iev.mba` → `A` record to Netlify's load balancer IP (Netlify
+        shows the current one), or `ALIAS`/`ANAME` if the registrar supports it
+      - `www` → `CNAME` to `<project>.netlify.app`
+      - delete the old project's A/CNAME records, or they'll keep winning
+      Propagation is usually minutes, occasionally up to 48h.
+- [ ] **3. Set `iev.mba` as the primary domain** in Netlify (not just an alias).
+      `URL` follows the primary domain, so an alias alone won't change the tags.
+- [ ] **4. Wait for the Let's Encrypt certificate** to provision (automatic).
+- [ ] **5. Trigger a deploy** so `index.html` and `llms.txt` regenerate with the
+      new host, then confirm:
+      `curl -s https://iev.mba/llms.txt | head -5`
+      `curl -s https://iev.mba/u/<slug> | grep -o 'rel="canonical"[^>]*'`
+- [ ] **6. Supabase → Authentication → URL Configuration:** add
+      `https://iev.mba` as Site URL and `https://iev.mba/**` to Redirect URLs,
+      or Google sign-in breaks on the new domain.
+- [ ] **7. Google Search Console:** add `iev.mba` as a property, verify it, and
+      submit the sitemap/URLs. Nothing gets crawled faster than you ask for it.
