@@ -63,3 +63,39 @@ In the Supabase dashboard for project `ytymuqlajzmysujgrksc`:
 - [ ] Publish a profile, open `/u/<your-slug>` in a new tab.
 - [ ] Paste the site URL into a link-preview tool (or a chat) — title, description,
       and OG image render.
+
+## 5. AI discoverability (GEO / AEO) — how to verify
+
+**Everything here only kicks in for profiles with the "Published" toggle on.**
+A draft profile is deliberately `noindex`, is excluded from `llms.txt`, and is
+not prerendered. If nothing below shows data, check that first.
+
+What ships, and what each piece is for:
+
+| URL | Served as | Needs JS? | Purpose |
+| --- | --- | --- | --- |
+| `/llms.txt` | plain Markdown | no | Site index for AI crawlers (llmstxt.org) |
+| `/llms-full.txt` | plain Markdown | no | Expanded site description |
+| `/llms/<slug>.txt` | plain Markdown | no | One file per published profile |
+| `/u/<slug>` | HTML + JSON-LD | no | Profile page, `<head>` prerendered at the edge |
+| `/api/og?...` | PNG 1200×630 | no | Link-preview card |
+
+- [ ] `curl https://<site>/llms.txt` returns Markdown (not the HTML shell). Once a
+      profile is published, a `## Founder profiles` section lists it.
+- [ ] `curl https://<site>/u/<slug> | grep ld+json` shows the JSON-LD **in the raw
+      HTML** — that is `netlify/edge-functions/profile-seo.ts` doing its job, and
+      it's what makes the profile readable by crawlers that don't run JavaScript.
+- [ ] Paste `https://<site>/u/<slug>` into <https://validator.schema.org> —
+      expect `Person`, `ProfessionalService`, and `ItemPage`.
+
+> Point the schema validator at a **profile URL**, never at `/llms.txt`.
+> `llms.txt` is plain Markdown by design, so a structured-data validator
+> correctly reports "No items detected" for it. That is a pass, not a failure.
+
+### How the two halves stay in sync
+
+`netlify/lib/seo.generated.mjs` is compiled from `src/lib/geo/schema.ts` by
+`scripts/build-edge-seo.mjs` (wired into `prebuild`). The edge prerender and the
+in-app `<SeoHead>` therefore run the *same* code — they can't drift. The file is
+committed so a deploy never depends on that step succeeding; run
+`npm run generate:edge-seo` after editing the schema builders.

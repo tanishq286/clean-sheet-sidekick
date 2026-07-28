@@ -9,8 +9,9 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prebuild": "node scripts/generate-llms.mjs",
-    "generate:llms": "node scripts/generate-llms.mjs"
+    "prebuild": "node scripts/generate-llms.mjs && node scripts/build-edge-seo.mjs",
+    "generate:llms": "node scripts/generate-llms.mjs",
+    "generate:edge-seo": "node scripts/build-edge-seo.mjs"
   },
   "dependencies": {
     "@fontsource/archivo-black": "^5.2.8",
