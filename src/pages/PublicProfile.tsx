@@ -1,4 +1,6 @@
 import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { recordProfileView } from "@/lib/analytics";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProfileBySlug, fetchMyProfile } from "@/lib/profile";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,6 +29,13 @@ export default function PublicProfile() {
     },
     enabled: !!slug,
   });
+
+  // Record the visit once the slug resolves. Owner views and repeat hits from
+  // the same browser within 30 minutes are filtered out server-side, and the
+  // call is fire-and-forget so analytics can never delay the page.
+  useEffect(() => {
+    if (slug && profile?.is_published) void recordProfileView(slug);
+  }, [slug, profile?.is_published]);
 
   if (isLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-muted-foreground">

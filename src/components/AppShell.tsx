@@ -16,7 +16,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     queryFn: async () => (await supabase.from("user_roles").select("role").eq("user_id", user!.id)).data ?? [],
     enabled: !!user,
   });
-  const isAdmin = roles.some((r: { role: string }) => r.role === "admin" || r.role === "college_admin");
+  const isAdmin = roles.some((r: { role: string }) => r.role === "admin");
+  const isCollegeAdmin = roles.some((r: { role: string }) => r.role === "admin" || r.role === "college_admin");
 
   const links = [
     { to: "/", label: "Home", end: false },
@@ -24,7 +25,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/app/edit", label: "Edit", end: false },
     { to: "/app/design", label: "Design", end: false },
     { to: "/app/export", label: "Export", end: false },
-    ...(isAdmin ? [{ to: "/app/college", label: "College", end: false }] : []),
+    ...(isCollegeAdmin ? [{ to: "/app/college", label: "College", end: false }] : []),
+    ...(isAdmin ? [{ to: "/app/admin", label: "Admin", end: false }] : []),
   ];
 
   const desktopItem = "px-3 py-2 rounded-md text-sm transition hover:bg-muted";
