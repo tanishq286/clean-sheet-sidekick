@@ -15,16 +15,27 @@
  * own bundle, and waiting on a webfont CDN made this 20x slower.
  */
 import { chromium } from "playwright-core";
-import { readFileSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const BASE = process.env.BASE ?? "http://127.0.0.1:4173";
-// Ids come from the source of truth so a new preset is swept automatically.
-const ids = [
-  ...readFileSync("src/templates/registry.tsx", "utf8").matchAll(/\{ id: "([a-z]+)",/g),
-].map((m) => m[1]);
-const presetIds = [...readFileSync("src/templates/composable/presets.ts", "utf8")
-  .matchAll(/^\s{4}id: "([a-z]+)"/gm)].map((m) => m[1]);
-const all = [...new Set([...ids, ...presetIds])];
+// Ids come from the catalog module itself, compiled on the fly. Scraping the
+// registry with a regex used to work until the handwritten entries moved into
+// catalog.ts and the sweep silently dropped to 30 of 36 templates — a test
+// that quietly checks less than it claims is worse than no test.
+const outfile = join(ROOT, "node_modules", ".cache", "sweep-catalog.mjs");
+await mkdir(dirname(outfile), { recursive: true });
+await build({
+  entryPoints: [join(ROOT, "src/templates/catalog.ts")],
+  outfile, bundle: true, format: "esm", platform: "node", target: "node18",
+  logLevel: "silent", alias: { "@": join(ROOT, "src") },
+});
+const { TEMPLATE_CATALOG } = await import(`${outfile}?t=${Date.now()}`);
+const all = TEMPLATE_CATALOG.map((t) => t.id);
 console.log(`sweeping ${all.length} templates\n`);
 
 // resume, editorial and minimal deliberately keep their original static

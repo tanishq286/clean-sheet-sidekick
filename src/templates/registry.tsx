@@ -1,4 +1,5 @@
-import type { TemplateMeta } from "./types";
+import type { TemplateMeta, TemplateProps } from "./types";
+import { HANDWRITTEN_INFO } from "./catalog";
 import ComposableTemplate from "./composable/ComposableTemplate";
 import { PRESETS } from "./composable/presets";
 import ResumeTemplate from "./resume";
@@ -8,15 +9,20 @@ import DossierTemplate from "./dossier";
 import ProfileTemplate from "./profile";
 import ShowcaseTemplate from "./showcase";
 
-/** The six original hand-written templates, unchanged. */
-const HANDWRITTEN: TemplateMeta[] = [
-  { id: "profile", name: "Profile", description: "LinkedIn-style: cover banner, large avatar, ventures grid, skills sidebar.", Component: ProfileTemplate },
-  { id: "showcase", name: "Showcase", description: "Cinematic dark hero with full-bleed cover, portrait, and venture gallery.", Component: ShowcaseTemplate },
-  { id: "resume", name: "Resume", description: "Bold display type, orange accents — the classic founder one-pager.", Component: ResumeTemplate },
-  { id: "editorial", name: "Editorial", description: "Dark, magazine-style with large headlines and serif quotes.", Component: EditorialTemplate },
-  { id: "minimal", name: "Minimal", description: "Calm, single-column, lots of whitespace.", Component: MinimalTemplate },
-  { id: "dossier", name: "Dossier", description: "Dense, structured investor brief layout.", Component: DossierTemplate },
-];
+/** The six original hand-written templates, paired with their catalog entry. */
+const HANDWRITTEN_COMPONENTS: Record<string, React.ComponentType<TemplateProps>> = {
+  profile: ProfileTemplate,
+  showcase: ShowcaseTemplate,
+  resume: ResumeTemplate,
+  editorial: EditorialTemplate,
+  minimal: MinimalTemplate,
+  dossier: DossierTemplate,
+};
+
+const HANDWRITTEN: TemplateMeta[] = HANDWRITTEN_INFO.map((info) => ({
+  ...info,
+  Component: HANDWRITTEN_COMPONENTS[info.id],
+}));
 
 /**
  * Spec-driven presets, rendered by one component. Adding a design is an entry

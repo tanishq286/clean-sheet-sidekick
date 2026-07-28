@@ -38,12 +38,12 @@ try {
 }
 const SITE_URL = (process.env.SITE_URL || process.env.URL || "https://portfoliobuildersiev.netlify.app").replace(/\/$/, "");
 
-/** Compile the app's TS formatting helpers to a temp ESM module we can import. */
-async function loadFormatters() {
-  const outfile = join(ROOT, "node_modules", ".cache", "llms-format.mjs");
+/** Compile a TS module in src/ to a temp ESM file we can import from Node. */
+async function loadTs(entry, name) {
+  const outfile = join(ROOT, "node_modules", ".cache", name);
   await mkdir(dirname(outfile), { recursive: true });
   await build({
-    entryPoints: [join(ROOT, "src/lib/geo/llms.ts")],
+    entryPoints: [join(ROOT, entry)],
     outfile,
     bundle: true,
     format: "esm",
@@ -53,6 +53,23 @@ async function loadFormatters() {
     alias: { "@": join(ROOT, "src") },
   });
   return import(`${outfile}?t=${Date.now()}`);
+}
+
+const loadFormatters = () => loadTs("src/lib/geo/llms.ts", "llms-format.mjs");
+
+/**
+ * Template names come from the catalog rather than a literal here. This line
+ * used to hardcode six names and kept claiming six after thirty more shipped —
+ * a file we hand to AI crawlers is the worst place to carry a stale fact.
+ */
+async function loadTemplateNames() {
+  try {
+    const { TEMPLATE_CATALOG } = await loadTs("src/templates/catalog.ts", "llms-catalog.mjs");
+    return TEMPLATE_CATALOG.map((t) => t.name);
+  } catch (err) {
+    console.warn("[llms] template catalog unavailable:", err?.message ?? err);
+    return [];
+  }
 }
 
 /** Fetch published profiles + their related rows straight from Supabase REST. */
@@ -98,7 +115,7 @@ async function fetchPublishedProfiles() {
   };
 }
 
-function siteLlmsTxt(profiles) {
+function siteLlmsTxt(profiles, templateNames) {
   const directory = profiles.length
     ? `\n## Founder profiles\n\n${profiles
         .map((p) => {
@@ -116,7 +133,7 @@ function siteLlmsTxt(profiles) {
 - **Site:** ${SITE_URL}
 - **What it is:** A founder profile builder for entrepreneurs and student founders
 - **Profile URLs:** ${SITE_URL}/u/{slug}
-- **Templates:** Resume, Editorial, Minimal, Dossier, Profile, Showcase
+- **Templates:** ${templateNames.length} designs — ${templateNames.join(', ')}
 - **Generated:** ${new Date().toISOString()}
 
 ## About
@@ -132,12 +149,12 @@ ${directory}
 `;
 }
 
-function siteLlmsFullTxt(profiles) {
+function siteLlmsFullTxt(profiles, templateNames) {
   return `# Founder ID — Full Site Description
 
 Source: ${SITE_URL}
 Generated: ${new Date().toISOString()}
-Published profiles: ${profiles.length}
+Published profiles: ${profiles.length}\nTemplate designs: ${templateNames.length}
 
 ## What Founder ID is
 
@@ -203,8 +220,9 @@ async function main() {
     }
   }
 
-  await writeFile(join(PUBLIC_DIR, "llms.txt"), siteLlmsTxt(profiles), "utf8");
-  await writeFile(join(PUBLIC_DIR, "llms-full.txt"), siteLlmsFullTxt(profiles), "utf8");
+  const templateNames = await loadTemplateNames();
+  await writeFile(join(PUBLIC_DIR, "llms.txt"), siteLlmsTxt(profiles, templateNames), "utf8");
+  await writeFile(join(PUBLIC_DIR, "llms-full.txt"), siteLlmsFullTxt(profiles, templateNames), "utf8");
 
   console.log(`[llms] wrote public/llms.txt + llms-full.txt · ${profiles.length} profile file(s)${note}`);
 }
