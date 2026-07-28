@@ -13,7 +13,7 @@ import SoundToggle from "@/components/SoundToggle";
 export default function PublicProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: ["public-profile", slug, user?.id ?? null],
     queryFn: async () => {
       const published = await fetchProfileBySlug(slug!);
@@ -43,6 +43,29 @@ export default function PublicProfile() {
       Loading profile…
     </div>
   );
+  // A failed request is NOT the same as a profile that doesn't exist. Rendering
+  // "this profile isn't here" when the backend was merely unreachable tells a
+  // visitor the founder has no page — the worst possible lie for a product
+  // whose value is a link someone else shared.
+  if (isError) return (
+    <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
+      <p className="mb-3 font-['JetBrains_Mono'] text-xs uppercase tracking-[0.25em] text-muted-foreground">Connection problem</p>
+      <h1 className="font-['Archivo_Black'] text-4xl tracking-tight mb-3">Couldn&apos;t load this profile</h1>
+      <p className="max-w-md text-muted-foreground">
+        The profile may well exist — we just couldn&apos;t reach the server. Check your connection and try again.
+      </p>
+      <button
+        type="button"
+        onClick={() => void refetch()}
+        disabled={isRefetching}
+        className="mt-6 rounded-lg border px-4 py-2 text-sm transition hover:bg-muted disabled:opacity-60"
+      >
+        {isRefetching ? "Retrying…" : "Try again"}
+      </button>
+      <a href="/" className="mt-4 text-sm text-[#FF6B35] hover:underline">Go to Founder ID →</a>
+    </div>
+  );
+
   if (!profile) return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
       <p className="mb-3 font-['JetBrains_Mono'] text-xs uppercase tracking-[0.25em] text-muted-foreground">Not found</p>

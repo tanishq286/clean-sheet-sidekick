@@ -6,7 +6,12 @@ const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    // Dev-only, and warn rather than error: a mistyped URL is expected traffic,
+    // not a fault. Keeping production consoles clean means a console.error in
+    // this app now always signals something genuinely wrong.
+    if (import.meta.env.DEV) {
+      console.warn("404: no route for", location.pathname);
+    }
   }, [location.pathname]);
 
   return (

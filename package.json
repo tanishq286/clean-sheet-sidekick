@@ -13,7 +13,11 @@
     "generate:llms": "node scripts/generate-llms.mjs",
     "generate:edge-seo": "node scripts/build-edge-seo.mjs",
     "typecheck": "tsc -b --force",
-    "test:templates": "node scripts/sweep-templates.mjs"
+    "test:templates": "node scripts/sweep-templates.mjs",
+    "test:routes": "node scripts/smoke-routes.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run build",
+    "verify:full": "npm run verify && npm run preview:test",
+    "preview:test": "node scripts/run-with-preview.mjs"
   },
   "dependencies": {
     "@fontsource/archivo-black": "^5.2.8",
