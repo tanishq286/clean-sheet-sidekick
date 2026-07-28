@@ -25,6 +25,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     { to: "/app/edit", label: "Edit", end: false },
     { to: "/app/design", label: "Design", end: false },
     { to: "/app/export", label: "Export", end: false },
+    { to: "/discover", label: "Discover", end: false },
     ...(isCollegeAdmin ? [{ to: "/app/college", label: "College", end: false }] : []),
     ...(isAdmin ? [{ to: "/app/admin", label: "Admin", end: false }] : []),
   ];

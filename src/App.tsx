@@ -23,6 +23,7 @@ const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const CollegeAdmin = lazy(() => import("./pages/CollegeAdmin"));
 const ExportPage = lazy(() => import("./pages/Export"));
+const Discover = lazy(() => import("./pages/Discover"));
 const TemplateGallery = lazy(() => import("./pages/TemplateGallery"));
 const StyleGuide = lazy(() => import("./pages/StyleGuide"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -59,6 +60,7 @@ const App = () => (
                   <Route path="/app/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                   <Route path="/app/college" element={<ProtectedRoute><CollegeAdmin /></ProtectedRoute>} />
                   <Route path="/app/export" element={<ProtectedRoute><ExportPage /></ProtectedRoute>} />
+                  <Route path="/discover" element={<Discover />} />
                   <Route path="/templates" element={<TemplateGallery />} />
                   <Route path="/templates/:id" element={<TemplateGallery />} />
                   <Route path="/style-guide" element={<StyleGuide />} />

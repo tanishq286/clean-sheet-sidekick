@@ -98,6 +98,31 @@ export default function Design() {
           </div>
 
           <div>
+            <h2 className="font-semibold mb-3">Typeface</h2>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { id: undefined, label: "Match template" },
+                { id: "rubik", label: "Sans" },
+                { id: "editorial", label: "Editorial" },
+                { id: "serif", label: "Serif" },
+                { id: "mono", label: "Mono" },
+              ] as const).map((f) => (
+                <Button
+                  key={f.label}
+                  size="sm"
+                  variant={profile.theme.fontPreset === f.id ? "default" : "outline"}
+                  onClick={() => update.mutate({ theme: { ...profile.theme, fontPreset: f.id } })}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
+            <div className="text-xs text-muted-foreground mt-2">
+              Applies to the 30 preset designs. The six signature templates use their own typography.
+            </div>
+          </div>
+
+          <div>
             <h2 className="font-semibold mb-3">Mode</h2>
             <div className="flex gap-2">
               {(["light", "dark"] as const).map((m) => (

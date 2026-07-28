@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import AeoScoreCard from "@/components/GeoAeoEngine/AeoScoreCard";
 import ViewsCard from "@/components/ViewsCard";
+import PublishToggle from "@/components/PublishToggle";
 import type { FullProfile } from "@/types/founder";
 
 export default function Dashboard() {
@@ -32,6 +33,7 @@ export default function Dashboard() {
     <AppShell>
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
         <OverviewHeader profile={profile} />
+        <PublishToggle profile={profile} />
         <section>
           <SectionHeading eyebrow="Reach" title="Who's seeing your profile" />
           <ViewsCard isPublished={profile.is_published} />

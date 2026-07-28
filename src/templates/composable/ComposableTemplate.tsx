@@ -3,7 +3,7 @@ import type { TemplateProps } from "../types";
 import { STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 import Milestones from "@/components/Milestones";
 import Portfolio from "@/components/Portfolio";
-import { TYPE_RAMP, type TemplateSpec } from "./spec";
+import { FONTS, TYPE_RAMP, type TemplateSpec } from "./spec";
 
 /**
  * Renders any TemplateSpec.
@@ -34,11 +34,14 @@ function Section({
   spec,
   label,
   title,
+  font,
   children,
 }: {
   spec: TemplateSpec;
   label?: string;
   title?: string;
+  /** Resolved heading face — the spec's, or the founder's chosen override. */
+  font: string;
   children: ReactNode;
 }) {
   const ramp = TYPE_RAMP[spec.scale];
@@ -48,7 +51,7 @@ function Section({
       {title && (
         <h2
           className={`${ramp.section} mb-4 font-semibold tracking-tight`}
-          style={{ fontFamily: spec.headingFont }}
+          style={{ fontFamily: font }}
         >
           {title}
         </h2>
@@ -108,9 +111,23 @@ function Photo({ spec, src, alt, className = "" }: { spec: TemplateSpec; src?: s
   );
 }
 
+/** theme.fontPreset is a user override; the spec supplies the default. */
+const PRESET_FONTS: Record<string, { heading: string; body: string }> = {
+  rubik: { heading: FONTS.rubik, body: FONTS.system },
+  editorial: { heading: FONTS.fraunces, body: FONTS.georgia },
+  mono: { heading: FONTS.mono, body: FONTS.mono },
+  serif: { heading: FONTS.serif, body: FONTS.georgia },
+};
+
 export default function ComposableTemplate({ profile, spec }: Props) {
   const { identity, founder, vision, contact, looking_for, skills, milestones, portfolio, theme } = profile;
   const ramp = TYPE_RAMP[spec.scale];
+
+  // Typeface: the design's own pairing unless the founder picked one. Falling
+  // back to the spec keeps every preset looking as intended by default.
+  const override = theme?.fontPreset ? PRESET_FONTS[theme.fontPreset] : undefined;
+  const headingFont = override?.heading ?? spec.headingFont;
+  const bodyFont = override?.body ?? spec.bodyFont;
 
   // The spec drives every colour through variables so the interactive sections
   // (which style themselves from `currentColor`) stay in the same palette.
@@ -121,7 +138,7 @@ export default function ComposableTemplate({ profile, spec }: Props) {
     "--tpl-surface": spec.palette.surface,
     backgroundColor: spec.palette.bg,
     color: spec.palette.fg,
-    fontFamily: spec.bodyFont,
+    fontFamily: bodyFont,
   } as CSSProperties;
 
   const skillLabels = skills.map((s) => SKILL_LABEL[s.tag] ?? s.tag);
@@ -132,7 +149,7 @@ export default function ComposableTemplate({ profile, spec }: Props) {
   const identityBlock = (
     <>
       <Photo spec={spec} src={identity.photo_url} alt={identity.name ?? "Profile photo"} className="mb-5 h-28 w-28" />
-      <h1 className={`${ramp.name} font-bold leading-[1.05] tracking-tight`} style={{ fontFamily: spec.headingFont }}>
+      <h1 className={`${ramp.name} font-bold leading-[1.05] tracking-tight`} style={{ fontFamily: headingFont }}>
         {identity.name ?? "Unnamed Founder"}
       </h1>
       {identity.headline && (
@@ -168,7 +185,7 @@ export default function ComposableTemplate({ profile, spec }: Props) {
   const bodySections = (
     <>
       {identity.bio && (
-        <Section spec={spec} label={spec.eyebrow ? "About" : undefined} title="About">
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "About" : undefined} title="About">
           <p className={`${ramp.body} max-w-prose leading-relaxed`} style={{ color: "var(--tpl-muted)" }}>
             {identity.bio}
           </p>
@@ -176,7 +193,7 @@ export default function ComposableTemplate({ profile, spec }: Props) {
       )}
 
       {(founder.current_venture || founder.problem || founder.mission) && (
-        <Section spec={spec} label={spec.eyebrow ? "Venture" : undefined} title={founder.current_venture || "What I'm building"}>
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "Venture" : undefined} title={founder.current_venture || "What I'm building"}>
           <div className="space-y-4">
             {founder.problem && (
               <p className={`${ramp.body} max-w-prose leading-relaxed`}>{founder.problem}</p>
@@ -191,7 +208,7 @@ export default function ComposableTemplate({ profile, spec }: Props) {
       )}
 
       {(vision.problem_solving || vision.why_it_matters) && (
-        <Section spec={spec} label={spec.eyebrow ? "Vision" : undefined} title="Vision">
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "Vision" : undefined} title="Vision">
           <div className="space-y-4">
             {vision.problem_solving && <p className={`${ramp.body} max-w-prose leading-relaxed`}>{vision.problem_solving}</p>}
             {vision.why_it_matters && (
@@ -204,25 +221,25 @@ export default function ComposableTemplate({ profile, spec }: Props) {
       )}
 
       {milestones.length > 0 && (
-        <Section spec={spec} label={spec.eyebrow ? "Journey" : undefined} title="Journey">
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "Journey" : undefined} title="Journey">
           <Milestones milestones={milestones} showHeader={false} variant={spec.surface} />
         </Section>
       )}
 
       {skillLabels.length > 0 && (
-        <Section spec={spec} label={spec.eyebrow ? "Toolkit" : undefined} title="Skills">
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "Toolkit" : undefined} title="Skills">
           <Chips items={skillLabels} spec={spec} />
         </Section>
       )}
 
       {lookingLabels.length > 0 && (
-        <Section spec={spec} label={spec.eyebrow ? "Open to" : undefined} title="Looking for">
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "Open to" : undefined} title="Looking for">
           <Chips items={lookingLabels} spec={spec} accent />
         </Section>
       )}
 
       {portfolio.length > 0 && (
-        <Section spec={spec} label={spec.eyebrow ? "Selected work" : undefined} title="Work">
+        <Section spec={spec} font={headingFont} label={spec.eyebrow ? "Selected work" : undefined} title="Work">
           <Portfolio portfolio={portfolio} showHeader={false} variant={spec.surface} />
         </Section>
       )}
