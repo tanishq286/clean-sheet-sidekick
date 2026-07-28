@@ -1,6 +1,8 @@
 import type { TemplateProps } from "../types";
+import Milestones from "@/components/Milestones";
+import Portfolio from "@/components/Portfolio";
 import { motion } from "framer-motion";
-import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
+import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 export default function MinimalTemplate({ profile }: TemplateProps) {
   const { identity, founder, vision, contact, looking_for, skills, milestones, portfolio, theme } = profile;
@@ -52,17 +54,7 @@ export default function MinimalTemplate({ profile }: TemplateProps) {
 
         {milestones.length > 0 && (
           <Section label="Journey">
-            <ul className="space-y-4">
-              {milestones.map((m) => (
-                <li key={m.id} className="grid grid-cols-[56px_1fr] gap-6">
-                  <span className="text-neutral-400 tabular-nums text-sm pt-0.5">{m.year}</span>
-                  <div>
-                    <div className="font-medium">{m.title}</div>
-                    {m.description && <p className="text-neutral-500 text-sm mt-0.5 leading-relaxed">{m.description}</p>}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <Milestones milestones={milestones} showHeader={false} variant="vivid" />
           </Section>
         )}
 
@@ -86,17 +78,7 @@ export default function MinimalTemplate({ profile }: TemplateProps) {
 
         {portfolio.length > 0 && (
           <Section label="Selected work">
-            <ul className="space-y-4">
-              {portfolio.map((p) => (
-                <li key={p.id}>
-                  <a href={p.url ?? p.file_url ?? "#"} target="_blank" rel="noreferrer" className="group flex items-baseline gap-3 hover:opacity-60 transition">
-                    <span className="text-xs text-neutral-400 w-28 shrink-0">{PORTFOLIO_LABEL[p.kind]}</span>
-                    <span className="flex-1">{p.title}</span>
-                    <span className="text-neutral-300 group-hover:translate-x-0.5 transition">→</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <Portfolio portfolio={portfolio} showHeader={false} variant="vivid" />
           </Section>
         )}
 

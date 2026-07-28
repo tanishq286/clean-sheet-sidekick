@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "prebuild": "node scripts/generate-llms.mjs && node scripts/build-edge-seo.mjs",
     "generate:llms": "node scripts/generate-llms.mjs",
-    "generate:edge-seo": "node scripts/build-edge-seo.mjs"
+    "generate:edge-seo": "node scripts/build-edge-seo.mjs",
+    "typecheck": "tsc -b --force",
+    "test:templates": "node scripts/sweep-templates.mjs"
   },
   "dependencies": {
     "@fontsource/archivo-black": "^5.2.8",

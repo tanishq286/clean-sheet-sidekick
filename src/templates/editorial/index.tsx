@@ -1,6 +1,8 @@
 import type { TemplateProps } from "../types";
 import { motion } from "framer-motion";
-import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
+import Milestones from "@/components/Milestones";
+import Portfolio from "@/components/Portfolio";
+import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 export default function EditorialTemplate({ profile }: TemplateProps) {
   const { identity, founder, vision, contact, looking_for, skills, milestones, portfolio, theme } = profile;
@@ -96,18 +98,9 @@ export default function EditorialTemplate({ profile }: TemplateProps) {
         {milestones.length > 0 && (
           <section className="mb-24 grid md:grid-cols-12 gap-10">
             <div className="md:col-span-3 text-xs uppercase tracking-[0.4em]" style={{ color: "var(--accent)" }}>Chronicle</div>
-            <ol className="md:col-span-9 space-y-8">
-              {milestones.map((m, i) => (
-                <motion.li key={m.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                  className="grid grid-cols-[80px_1fr] gap-6 pb-8 border-b border-current/10 last:border-0">
-                  <div className="font-['Instrument_Serif'] text-3xl" style={{ color: "var(--accent)" }}>{m.year}</div>
-                  <div>
-                    <div className="font-['Instrument_Serif'] text-2xl mb-2">{m.title}</div>
-                    {m.description && <p className="font-['Fraunces'] opacity-80 leading-relaxed">{m.description}</p>}
-                  </div>
-                </motion.li>
-              ))}
-            </ol>
+            <div className="md:col-span-9">
+              <Milestones milestones={milestones} showHeader={false} variant="document" />
+            </div>
           </section>
         )}
 
@@ -135,16 +128,7 @@ export default function EditorialTemplate({ profile }: TemplateProps) {
         {portfolio.length > 0 && (
           <section className="mb-16">
             <div className="text-xs uppercase tracking-[0.4em] mb-8 text-center" style={{ color: "var(--accent)" }}>Selected Works</div>
-            <div className="grid sm:grid-cols-2 gap-6">
-              {portfolio.map((p) => (
-                <a key={p.id} href={p.url ?? p.file_url ?? "#"} target="_blank" rel="noreferrer"
-                  className="group block p-6 border border-current/20 hover:border-current/60 transition">
-                  <div className="text-[10px] uppercase tracking-[0.3em] mb-3" style={{ color: "var(--accent)" }}>{PORTFOLIO_LABEL[p.kind]}</div>
-                  <div className="font-['Instrument_Serif'] text-3xl leading-tight mb-2 group-hover:italic transition">{p.title}</div>
-                  {p.description && <p className="font-['Fraunces'] text-sm opacity-70 leading-relaxed">{p.description}</p>}
-                </a>
-              ))}
-            </div>
+            <Portfolio portfolio={portfolio} showHeader={false} variant="document" />
           </section>
         )}
 

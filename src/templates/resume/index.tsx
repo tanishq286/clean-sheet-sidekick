@@ -1,6 +1,8 @@
 import type { TemplateProps } from "../types";
 import { motion } from "framer-motion";
-import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
+import Milestones from "@/components/Milestones";
+import Portfolio from "@/components/Portfolio";
+import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 export default function ResumeTemplate({ profile }: TemplateProps) {
   const { identity, founder, vision, contact, looking_for, skills, milestones, portfolio, theme } = profile;
@@ -80,18 +82,7 @@ export default function ResumeTemplate({ profile }: TemplateProps) {
           <div className="md:col-span-1 text-[10px] uppercase tracking-[0.4em] opacity-50">003</div>
           <div className="md:col-span-7">
             <h3 className="text-xs uppercase tracking-[0.3em] mb-8" style={{ color: "var(--accent)" }}>Journey</h3>
-            <ol className="relative">
-              {milestones.map((m, i) => (
-                <motion.li key={m.id} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                  className="grid grid-cols-[90px_1fr] gap-6 py-5 border-b border-neutral-900/10 last:border-0">
-                  <div className="font-['Archivo_Black'] text-2xl" style={{ color: "var(--accent)" }}>{m.year}</div>
-                  <div>
-                    <div className="font-medium text-lg mb-1">{m.title}</div>
-                    {m.description && <p className="text-sm text-neutral-600 leading-relaxed">{m.description}</p>}
-                  </div>
-                </motion.li>
-              ))}
-            </ol>
+              <Milestones milestones={milestones} showHeader={false} variant="document" />
           </div>
           <div className="md:col-span-4 md:col-start-9 space-y-10">
             {skills.length > 0 && (
@@ -121,19 +112,7 @@ export default function ResumeTemplate({ profile }: TemplateProps) {
             <div className="md:col-span-1 text-[10px] uppercase tracking-[0.4em] opacity-50">004</div>
             <div className="md:col-span-11">
               <h3 className="text-xs uppercase tracking-[0.3em] mb-8" style={{ color: "var(--accent)" }}>Portfolio</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-neutral-900/15">
-                {portfolio.map((p) => (
-                  <a key={p.id} href={p.url ?? p.file_url ?? "#"} target="_blank" rel="noreferrer"
-                    className="group bg-[#f5f3ee] p-6 hover:bg-white transition flex flex-col gap-3 min-h-[160px]">
-                    <div className="flex justify-between items-start">
-                      <span className="text-[10px] uppercase tracking-widest" style={{ color: "var(--accent)" }}>{PORTFOLIO_LABEL[p.kind]}</span>
-                      <span className="text-neutral-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition">↗</span>
-                    </div>
-                    <div className="font-['Archivo_Black'] text-xl uppercase leading-tight">{p.title}</div>
-                    {p.description && <p className="text-sm text-neutral-600 mt-auto">{p.description}</p>}
-                  </a>
-                ))}
-              </div>
+              <Portfolio portfolio={portfolio} showHeader={false} variant="document" />
             </div>
           </section>
         )}

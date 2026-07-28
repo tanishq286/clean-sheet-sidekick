@@ -5,6 +5,9 @@ import Portfolio from "@/components/Portfolio";
 import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 type VentureCard = {
+  /** Declared explicitly: the index signature below would otherwise
+   *  type it as `unknown`, which React rejects as a key. */
+  id?: string;
   name?: string | null;
   industry?: string | null;
   stage?: string | null;
