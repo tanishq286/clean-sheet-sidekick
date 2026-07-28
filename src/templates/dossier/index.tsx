@@ -1,5 +1,7 @@
 import type { TemplateProps } from "../types";
-import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL, PORTFOLIO_LABEL } from "../shared/themeStyle";
+import Milestones from "@/components/Milestones";
+import Portfolio from "@/components/Portfolio";
+import { themeStyle, STAGE_LABEL, LOOKING_LABEL, SKILL_LABEL } from "../shared/themeStyle";
 
 export default function DossierTemplate({ profile }: TemplateProps) {
   const { identity, founder, vision, contact, looking_for, skills, milestones, portfolio, theme } = profile;
@@ -89,42 +91,13 @@ export default function DossierTemplate({ profile }: TemplateProps) {
 
             {milestones.length > 0 && (
               <Block n="05" title="Chronology">
-                <table className="w-full text-xs">
-                  <thead className="text-[10px] uppercase tracking-widest opacity-60">
-                    <tr className="border-b border-neutral-900/30">
-                      <th className="text-left py-1 w-16">Year</th>
-                      <th className="text-left py-1">Event</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {milestones.map((m, i) => (
-                      <tr key={m.id} className="border-b border-neutral-900/10 align-top">
-                        <td className="py-2 pr-4 tabular-nums" style={{ color: "var(--accent)" }}>{m.year}</td>
-                        <td className="py-2">
-                          <div className="font-semibold">{String(i + 1).padStart(2, "0")} · {m.title}</div>
-                          {m.description && <div className="opacity-70 mt-0.5">{m.description}</div>}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <Milestones milestones={milestones} showHeader={false} variant="document" />
               </Block>
             )}
 
             {portfolio.length > 0 && (
               <Block n="06" title="Attachments">
-                <ul className="space-y-1.5">
-                  {portfolio.map((p, i) => (
-                    <li key={p.id} className="flex items-start gap-3 border-b border-dotted border-neutral-900/20 pb-1.5">
-                      <span className="opacity-50 tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-                      <span className="text-[10px] uppercase tracking-wider opacity-60 w-32 shrink-0 pt-0.5">[{PORTFOLIO_LABEL[p.kind]}]</span>
-                      <a className="flex-1 underline-offset-2 hover:underline" style={{ color: "var(--accent)" }} href={p.url ?? p.file_url ?? "#"} target="_blank" rel="noreferrer">
-                        {p.title}
-                      </a>
-                      <span className="opacity-40">↗</span>
-                    </li>
-                  ))}
-                </ul>
+                <Portfolio portfolio={portfolio} showHeader={false} variant="document" />
               </Block>
             )}
           </main>

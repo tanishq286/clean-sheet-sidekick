@@ -22,6 +22,7 @@ const Design = lazy(() => import("./pages/Design"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const CollegeAdmin = lazy(() => import("./pages/CollegeAdmin"));
 const ExportPage = lazy(() => import("./pages/Export"));
+const TemplateGallery = lazy(() => import("./pages/TemplateGallery"));
 const StyleGuide = lazy(() => import("./pages/StyleGuide"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -56,6 +57,8 @@ const App = () => (
                   <Route path="/app/design" element={<ProtectedRoute><Design /></ProtectedRoute>} />
                   <Route path="/app/college" element={<ProtectedRoute><CollegeAdmin /></ProtectedRoute>} />
                   <Route path="/app/export" element={<ProtectedRoute><ExportPage /></ProtectedRoute>} />
+                  <Route path="/templates" element={<TemplateGallery />} />
+                  <Route path="/templates/:id" element={<TemplateGallery />} />
                   <Route path="/style-guide" element={<StyleGuide />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -5,12 +5,15 @@ import { PORTFOLIO_LABEL } from "@/templates/shared/themeStyle";
 import Counter from "@/components/Counter";
 import TiltCard from "./TiltCard";
 import { playClickSound, playHoverSound, playOpenSound } from "@/lib/audio";
+import { SURFACE, type SurfaceVariant } from "@/templates/shared/surface";
 
 interface PortfolioProps {
   portfolio: PortfolioItem[];
   title?: string;
   /** Templates that render their own section heading pass false. */
   showHeader?: boolean;
+  /** "document" strips radii and glow for the dry, print-like templates. */
+  variant?: SurfaceVariant;
   className?: string;
 }
 
@@ -23,10 +26,11 @@ const linkOf = (item: PortfolioItem) => item.url ?? item.file_url ?? null;
  * The filters are built from the kinds actually present in the data rather than
  * a fixed list, so a founder with only decks never sees an empty "Awards" pill.
  */
-export default function Portfolio({ portfolio, title = "Work", showHeader = true, className = "" }: PortfolioProps) {
+export default function Portfolio({ portfolio, title = "Work", showHeader = true, variant = "vivid", className = "" }: PortfolioProps) {
   const [filter, setFilter] = useState<PortfolioKind | "all">("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const sx = SURFACE[variant];
 
   const kinds = useMemo(() => {
     const seen = new Set<PortfolioKind>();
@@ -66,11 +70,13 @@ export default function Portfolio({ portfolio, title = "Work", showHeader = true
 
   return (
     <section className={`relative ${className}`} aria-label={title}>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-8 -top-10 h-44 opacity-[0.16] blur-3xl"
-        style={{ background: "radial-gradient(60% 100% at 30% 0%, var(--accent) 0%, transparent 70%)" }}
-      />
+      {sx.glow && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 -top-10 h-44 opacity-[0.16] blur-3xl"
+          style={{ background: "radial-gradient(60% 100% at 30% 0%, var(--accent) 0%, transparent 70%)" }}
+        />
+      )}
 
       <header
         className={`relative z-10 mb-5 flex items-end gap-4 ${showHeader ? "justify-between" : "justify-end"}`}
@@ -94,7 +100,7 @@ export default function Portfolio({ portfolio, title = "Work", showHeader = true
                 onClick={() => selectFilter(k as PortfolioKind | "all")}
                 onPointerEnter={playHoverSound}
                 aria-pressed={active}
-                className="pointer-events-auto relative z-10 rounded-full border border-current/20 px-3.5 py-1.5 text-sm transition hover:bg-current/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/40"
+                className={`pointer-events-auto relative z-10 ${sx.pill} transition hover:bg-current/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/40`}
                 style={
                   active
                     ? {
@@ -126,12 +132,16 @@ export default function Portfolio({ portfolio, title = "Work", showHeader = true
                 transition={{ type: "spring", stiffness: 320, damping: 30 }}
               >
                 <TiltCard className="h-full">
-                  <div className="group flex h-full flex-col rounded-2xl border border-current/15 bg-current/[0.04] p-5 backdrop-blur-sm transition hover:border-current/30">
+                  <div className={`group flex h-full flex-col ${sx.card} p-5 transition hover:border-current/40`}>
                     <span
-                      className="mb-2 w-fit rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide"
+                      className={`mb-2 w-fit ${sx.chip}`}
                       style={{
                         color: "var(--accent)",
-                        backgroundColor: "color-mix(in srgb, var(--accent) 12%, transparent)",
+                        borderColor: "var(--accent)",
+                        backgroundColor:
+                          variant === "document"
+                            ? "transparent"
+                            : "color-mix(in srgb, var(--accent) 12%, transparent)",
                       }}
                     >
                       {PORTFOLIO_LABEL[item.kind] ?? item.kind}
@@ -150,7 +160,7 @@ export default function Portfolio({ portfolio, title = "Work", showHeader = true
                           playOpenSound();
                         }}
                         onPointerEnter={playHoverSound}
-                        className="pointer-events-auto relative z-10 rounded-lg border border-current/20 px-3 py-1.5 text-sm transition hover:bg-current/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/40"
+                        className={`pointer-events-auto relative z-10 border border-current/25 ${sx.radius ? "rounded-lg" : ""} px-3 py-1.5 text-sm transition hover:bg-current/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/40`}
                       >
                         View details
                       </button>

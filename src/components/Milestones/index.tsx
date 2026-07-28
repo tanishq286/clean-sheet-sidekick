@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Milestone } from "@/types/founder";
 import Counter from "@/components/Counter";
 import { playClickSound, playHoverSound, playOpenSound } from "@/lib/audio";
+import { SURFACE, type SurfaceVariant } from "@/templates/shared/surface";
 
 interface MilestonesProps {
   milestones: Milestone[];
@@ -10,6 +11,8 @@ interface MilestonesProps {
   title?: string;
   /** Templates that render their own section heading pass false. */
   showHeader?: boolean;
+  /** "document" strips radii and glow for the dry, print-like templates. */
+  variant?: SurfaceVariant;
   className?: string;
 }
 
@@ -24,9 +27,10 @@ interface MilestonesProps {
  * (year, description, position). Nothing invents a verification state: a
  * public profile must not display a status the database cannot back up.
  */
-export default function Milestones({ milestones, title = "Journey", showHeader = true, className = "" }: MilestonesProps) {
+export default function Milestones({ milestones, title = "Journey", showHeader = true, variant = "vivid", className = "" }: MilestonesProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const sx = SURFACE[variant];
 
   if (milestones.length === 0) return null;
 
@@ -44,11 +48,13 @@ export default function Milestones({ milestones, title = "Journey", showHeader =
     <section className={`relative ${className}`} aria-label={title}>
       {/* Decorative wash. pointer-events-none is load-bearing: without it this
           layer sits above the timeline and silently eats every click. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-8 -top-8 h-40 opacity-[0.18] blur-3xl"
-        style={{ background: "radial-gradient(60% 100% at 50% 0%, var(--accent) 0%, transparent 70%)" }}
-      />
+      {sx.glow && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 -top-8 h-40 opacity-[0.18] blur-3xl"
+          style={{ background: "radial-gradient(60% 100% at 50% 0%, var(--accent) 0%, transparent 70%)" }}
+        />
+      )}
 
       <header
         className={`relative z-10 mb-6 flex items-end gap-4 ${showHeader ? "justify-between" : "justify-end"}`}
@@ -65,7 +71,7 @@ export default function Milestones({ milestones, title = "Journey", showHeader =
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-[11px] top-2 bottom-2 w-px"
-          style={{ background: "linear-gradient(to bottom, var(--accent), transparent)" }}
+          style={{ background: sx.rail }}
         />
 
         {milestones.map((m) => {
@@ -97,37 +103,37 @@ export default function Milestones({ milestones, title = "Journey", showHeader =
                 />
               </span>
 
-              <motion.div layout={!reduceMotion} className="rounded-xl border border-current/15 bg-current/[0.04] backdrop-blur-sm">
+              <motion.div layout={!reduceMotion} className={sx.card}>
                 <button
                   type="button"
                   onClick={() => toggle(m.id)}
                   onPointerEnter={playHoverSound}
                   aria-expanded={isOpen}
                   aria-controls={hasDetail ? panelId : undefined}
-                  className="pointer-events-auto relative z-10 flex w-full items-start gap-3 rounded-xl p-4 text-left transition hover:bg-current/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/40"
+                  className={`pointer-events-auto relative z-10 flex w-full items-start gap-3 ${sx.radius} p-4 text-left transition hover:bg-current/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/40`}
                 >
                   <span className="flex-1">
                     <span className="flex flex-wrap items-center gap-2">
                       {m.year && (
                         <span
-                          className="rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+                          className={sx.chip}
                           style={{
                             color: "var(--accent)",
-                            backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)",
+                            borderColor: "var(--accent)",
+                            backgroundColor:
+                              variant === "document"
+                                ? "transparent"
+                                : "color-mix(in srgb, var(--accent) 14%, transparent)",
                           }}
                         >
                           {m.year}
                         </span>
                       )}
                       {m.id === latestId && (
-                        <span className="rounded-full border border-current/20 px-2 py-0.5 text-[11px] font-medium opacity-60">
-                          Latest
-                        </span>
+                        <span className={sx.badge}>Latest</span>
                       )}
                       {hasDetail && (
-                        <span className="rounded-full border border-current/20 px-2 py-0.5 text-[11px] font-medium opacity-60">
-                          Details
-                        </span>
+                        <span className={sx.badge}>Details</span>
                       )}
                     </span>
                     <span className="mt-1.5 block font-medium leading-snug">{m.title}</span>

@@ -20,6 +20,7 @@ export default function Design() {
   const { data: profile } = useMyProfile();
   const update = useUpdateProfile();
   const [showContact, setShowContact] = useState(true);
+  const [query, setQuery] = useState("");
   const { data: full } = useQuery({
     queryKey: ["full-profile", user?.id, profile?.template_id, profile?.theme],
     queryFn: () => fetchMyProfile(user!.id),
@@ -27,6 +28,17 @@ export default function Design() {
   });
 
   if (!profile || !full) return <AppShell><div className="p-12 text-muted-foreground">Loading…</div></AppShell>;
+
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? TEMPLATES.filter((t) => `${t.name} ${t.description} ${t.family ?? ""}`.toLowerCase().includes(q))
+    : TEMPLATES;
+  const grouped = [...matches.reduce((map, t) => {
+    const key = t.family ?? "Signature";
+    map.set(key, [...(map.get(key) ?? []), t]);
+    return map;
+  }, new Map<string, typeof TEMPLATES>())];
+
   const Template = getTemplate(profile.template_id).Component;
 
   return (
@@ -34,16 +46,40 @@ export default function Design() {
       <div className="grid lg:grid-cols-[340px_1fr] min-h-[calc(100vh-3.5rem)]">
         <aside className="border-r p-6 space-y-8 overflow-y-auto">
           <div>
-            <h2 className="font-semibold mb-3">Template</h2>
-            <div className="space-y-2">
-              {TEMPLATES.map((t) => (
-                <button key={t.id} onClick={async () => { await update.mutateAsync({ template_id: t.id }); toast({ title: `Template: ${t.name}` }); }}
-                  className={`w-full text-left border rounded-lg p-3 hover:bg-muted ${profile.template_id === t.id ? "border-foreground" : ""}`}>
-                  <div className="font-medium">{t.name}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{t.description}</div>
-                </button>
-              ))}
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+              <h2 className="font-semibold">Template</h2>
+              <span className="text-xs text-muted-foreground tabular-nums">{matches.length} of {TEMPLATES.length}</span>
             </div>
+            {/* A flat list of 36 is unusable; search + family grouping keeps it
+                navigable as more presets are added. */}
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search templates…"
+              aria-label="Search templates"
+              className="mb-3"
+            />
+            {matches.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4">No template matches "{query}".</p>
+            ) : (
+              <div className="space-y-5">
+                {grouped.map(([family, list]) => (
+                  <div key={family}>
+                    <div className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2">{family}</div>
+                    <div className="space-y-2">
+                      {list.map((t) => (
+                        <button key={t.id} onClick={async () => { await update.mutateAsync({ template_id: t.id }); toast({ title: `Template: ${t.name}` }); }}
+                          aria-pressed={profile.template_id === t.id}
+                          className={`w-full text-left border rounded-lg p-3 hover:bg-muted ${profile.template_id === t.id ? "border-foreground" : ""}`}>
+                          <div className="font-medium">{t.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{t.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
