@@ -162,13 +162,35 @@ export default function Design() {
             <Template profile={full} />
             {profile.theme.display_habits && <HabitsBlock slug={profile.slug} demo={DEMO_HABITS} />}
             {showContact && (
-              <ContactSection
-                name={full.identity?.name}
-                email={full.contact?.email}
-                slug={profile.slug}
-                accent={profile.theme.accent}
-                demoMode
-              />
+              <div className="relative">
+                {/* The contact form is shown so you can see it, not use it.
+                    Left live it was a trap: filling it in and pressing Send
+                    put it in the terminal "Message sent!" state, which then
+                    occupied the whole preview pane with no way back —
+                    switching templates doesn't clear it, because React keeps
+                    the same component instance across the swap.
+
+                    `inert` blocks pointer, keyboard and assistive-tech access
+                    in one attribute; pointer-events-none is the fallback for
+                    anything that doesn't support it. The template above stays
+                    fully interactive on purpose, so the milestone timeline
+                    and portfolio drawers can still be tried out. */}
+                <div
+                  ref={(el) => el?.setAttribute("inert", "")}
+                  className="pointer-events-none select-none"
+                >
+                  <ContactSection
+                    name={full.identity?.name}
+                    email={full.contact?.email}
+                    slug={profile.slug}
+                    accent={profile.theme.accent}
+                    demoMode
+                  />
+                </div>
+                <p className="absolute right-3 top-3 rounded-full bg-background/80 px-2.5 py-1 text-[11px] text-muted-foreground backdrop-blur">
+                  Preview — live on your public profile
+                </p>
+              </div>
             )}
           </div>
         </div>
