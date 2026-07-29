@@ -19,7 +19,8 @@ export default function Design() {
   const { user } = useAuth();
   const { data: profile } = useMyProfile();
   const update = useUpdateProfile();
-  const [showContact, setShowContact] = useState(true);
+  // Reads from the saved theme rather than local state — the checkbox used to
+  // be preview-only, so switching it off changed nothing on the live profile.
   const [query, setQuery] = useState("");
   const { data: full } = useQuery({
     queryKey: ["full-profile", user?.id, profile?.template_id, profile?.theme],
@@ -28,6 +29,9 @@ export default function Design() {
   });
 
   if (!profile || !full) return <AppShell><div className="p-12 text-muted-foreground">Loading…</div></AppShell>;
+
+  // Absent means on, matching PublicProfile, so existing profiles are unchanged.
+  const showContact = profile.theme?.show_contact ?? true;
 
   const q = query.trim().toLowerCase();
   const matches = q
@@ -136,11 +140,18 @@ export default function Design() {
           <div>
             <h2 className="font-semibold mb-3">Contact section</h2>
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={showContact} onChange={(e) => setShowContact(e.target.checked)} />
-              Preview contact form below profile
+              <input
+                type="checkbox"
+                checked={showContact}
+                onChange={(e) =>
+                  update.mutate({ theme: { ...profile.theme, show_contact: e.target.checked } })
+                }
+              />
+              Show contact form on public profile
             </label>
             <div className="text-xs text-muted-foreground mt-2">
-              Runs in demo mode here — submissions are simulated so you can test the flow safely.
+              Simulated here so you can try the flow — on your public profile it opens a prefilled
+              email to {profile.contact?.email || "your contact address"}.
             </div>
           </div>
 
@@ -162,35 +173,24 @@ export default function Design() {
             <Template profile={full} />
             {profile.theme.display_habits && <HabitsBlock slug={profile.slug} demo={DEMO_HABITS} />}
             {showContact && (
-              <div className="relative">
-                {/* The contact form is shown so you can see it, not use it.
-                    Left live it was a trap: filling it in and pressing Send
-                    put it in the terminal "Message sent!" state, which then
-                    occupied the whole preview pane with no way back —
-                    switching templates doesn't clear it, because React keeps
-                    the same component instance across the swap.
-
-                    `inert` blocks pointer, keyboard and assistive-tech access
-                    in one attribute; pointer-events-none is the fallback for
-                    anything that doesn't support it. The template above stays
-                    fully interactive on purpose, so the milestone timeline
-                    and portfolio drawers can still be tried out. */}
-                <div
-                  ref={(el) => el?.setAttribute("inert", "")}
-                  className="pointer-events-none select-none"
-                >
-                  <ContactSection
-                    name={full.identity?.name}
-                    email={full.contact?.email}
-                    slug={profile.slug}
-                    accent={profile.theme.accent}
-                    demoMode
-                  />
-                </div>
-                <p className="absolute right-3 top-3 rounded-full bg-background/80 px-2.5 py-1 text-[11px] text-muted-foreground backdrop-blur">
-                  Preview — live on your public profile
-                </p>
-              </div>
+              // Fully interactive on purpose — the panel promises you can test
+              // the flow, so trying it has to actually work.
+              //
+              // The key is what stops it becoming a trap. Submitting leaves the
+              // form on its terminal "Message sent!" card, and without a key
+              // React reconciles this as the same instance when you switch
+              // templates, so that card survived every swap and swallowed the
+              // whole preview pane. Keying on the template makes picking any
+              // design remount it clean, which is the move people already
+              // reach for when a preview looks wrong.
+              <ContactSection
+                key={profile.template_id}
+                name={full.identity?.name}
+                email={full.contact?.email}
+                slug={profile.slug}
+                accent={profile.theme.accent}
+                demoMode
+              />
             )}
           </div>
         </div>

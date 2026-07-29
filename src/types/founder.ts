@@ -78,6 +78,9 @@ export interface Theme {
   mode: "light" | "dark";
   fontPreset: "rubik" | "editorial" | "mono" | "serif";
   display_habits?: boolean;
+  /** Show the contact form on the public profile. Absent means on, so
+   *  existing profiles keep the form they already have. */
+  show_contact?: boolean;
 }
 
 export interface FounderProfile {

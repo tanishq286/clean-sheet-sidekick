@@ -91,12 +91,16 @@ export default function PublicProfile() {
       </div>
       <Template profile={profile} />
       {profile.theme?.display_habits && <HabitsBlock slug={profile.slug} />}
-      <ContactSection
-        name={profile.identity?.name}
-        email={profile.contact?.email}
-        slug={profile.slug}
-        accent={profile.theme?.accent ?? "#FF6B35"}
-      />
+      {/* Absent means on: profiles created before this setting existed keep
+          the contact form they already had. */}
+      {(profile.theme?.show_contact ?? true) && (
+        <ContactSection
+          name={profile.identity?.name}
+          email={profile.contact?.email}
+          slug={profile.slug}
+          accent={profile.theme?.accent ?? "#FF6B35"}
+        />
+      )}
     </>
   );
 }
