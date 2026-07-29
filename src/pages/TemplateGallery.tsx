@@ -1,4 +1,6 @@
-import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import TemplateThumb from "@/components/TemplateThumb";
 import { TEMPLATES, getTemplate } from "@/templates/registry";
 import type { FullProfile } from "@/types/founder";
 
@@ -50,10 +52,14 @@ const DEMO: Omit<FullProfile, "template_id"> = {
 
 export default function TemplateGallery() {
   const { id } = useParams<{ id?: string }>();
+  const [params] = useSearchParams();
+  const [family, setFamily] = useState<string>("All");
+  const embed = params.get("embed") === "1";
 
   if (id) {
     const meta = getTemplate(id);
     const Template = meta.Component;
+    if (embed) return <Template profile={{ ...DEMO, template_id: meta.id }} />;
     return (
       <>
         <div className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-2 bg-neutral-900 px-4 py-2 text-sm text-neutral-100">
@@ -69,29 +75,60 @@ export default function TemplateGallery() {
     );
   }
 
-  const families = [...new Set(TEMPLATES.map((t) => t.family ?? "Signature"))];
+  const families = ["All", ...new Set(TEMPLATES.map((t) => t.family ?? "Signature"))];
+  const shown = family === "All" ? TEMPLATES : TEMPLATES.filter((t) => (t.family ?? "Signature") === family);
+
   return (
     <div className="min-h-screen bg-background px-6 py-12">
-      <div className="mx-auto max-w-4xl">
-        <h1 className="text-3xl font-bold tracking-tight">Templates</h1>
-        <p className="mt-2 text-muted-foreground">
-          {TEMPLATES.length} designs, previewed with demo data. Pick one from the Design page to apply it.
+      <div className="mx-auto max-w-6xl">
+        <Link to="/" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+          &larr; Founder ID
+        </Link>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight">Templates</h1>
+        <p className="mt-2 max-w-prose text-muted-foreground">
+          {TEMPLATES.length} designs, each shown live with the same demo profile so you can compare
+          them fairly. Click any one to open it full size, then apply your favourite from the Design
+          page.
         </p>
-        {families.map((family) => (
-          <section key={family} className="mt-10">
-            <h2 className="mb-3 text-xs uppercase tracking-widest text-muted-foreground">{family}</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {TEMPLATES.filter((t) => (t.family ?? "Signature") === family).map((t) => (
-                <li key={t.id}>
-                  <Link to={`/templates/${t.id}`} className="block rounded-lg border p-4 transition hover:bg-muted">
-                    <div className="font-medium">{t.name}</div>
-                    <div className="mt-1 text-sm text-muted-foreground">{t.description}</div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+
+        <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter by family">
+          {families.map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setFamily(f)}
+              aria-pressed={family === f}
+              className={`rounded-full border px-3.5 py-1.5 text-sm transition hover:bg-muted ${
+                family === f ? "border-foreground font-medium" : ""
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+          <span className="self-center text-sm text-muted-foreground tabular-nums">
+            {shown.length} shown
+          </span>
+        </div>
+
+        <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((t) => (
+            <li key={t.id}>
+              <Link
+                to={`/templates/${t.id}`}
+                className="group block rounded-xl border p-3 transition hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <TemplateThumb id={t.id} title={t.name} />
+                <div className="mt-3 flex items-baseline justify-between gap-2">
+                  <span className="font-medium group-hover:underline">{t.name}</span>
+                  <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {t.family ?? "Signature"}
+                  </span>
+                </div>
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{t.description}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
