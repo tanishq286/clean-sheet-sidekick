@@ -135,8 +135,33 @@ pointing at a domain that isn't serving the site yet.
 
 ## 7. Moving the site to a different Netlify account
 
+**Status: migrated.** The live site now runs under `founderid.help@gmail.com`,
+imported straight from GitHub with the same site name, so nothing on the
+Supabase side (redirect URLs) had to change — they match by URL string, not by
+which Netlify account is serving it.
+
+| | Current | Previous |
+| --- | --- | --- |
+| Team | `founderid-help’s team` (slug `founderid-help`) — **Free** plan | `tanishq28` (slug `tanishq286`) |
+| Site name | `portfoliobuildersiev` | renamed to `ortfoliobuildersiev` to free the name — not deleted, kept as a rollback |
+| Site ID | `4ecbbee9-ffbd-4116-9f08-33345aa5a9ad` | `c0c8e5f5-be3a-458d-b2e3-7c92048806c3` |
+| Source | GitHub `tanishq286/clean-sheet-sidekick`, branch `main` | same |
+
+Two things the import didn't carry over, both fixed post-import:
+
+- **Env vars started empty.** `VITE_SUPABASE_URL`, `VITE_SUPABASE_PROJECT_ID`,
+  `VITE_SUPABASE_PUBLISHABLE_KEY` weren't set, so the build succeeded but the
+  deployed app crashed at runtime (`createClient(undefined, undefined)`) — a
+  blank screen for every visitor, not a build failure. Now set at all scopes.
+- **New accounts default to "Require team login."** Netlify locks a freshly
+  created site's visitor access to team members only, so even a correctly
+  built site would 403 the public. Turned off for this account.
+
+The rest of the old §7 below is left as the general playbook — useful again
+the next time an account needs to move.
+
 Use this when the current team's free allowance runs out, or to hand ownership
-to the founder's email. Today's setup:
+to the founder's email. Original setup, before the move above:
 
 | | |
 | --- | --- |
@@ -199,6 +224,20 @@ history and env vars all come along: no DNS change, no Supabase change, and the
 
       None of these are secrets: the publishable key is shipped to the browser
       and is safe in a public repo. RLS is what protects the data.
+
+      ⚠️ Missing env vars are **not a build failure**. `npm run build` doesn't
+      read them — `import.meta.env.VITE_SUPABASE_URL` just becomes `undefined`
+      in the bundle, and the deploy reports success. The app then crashes at
+      runtime the moment a visitor loads it (`createClient(undefined,
+      undefined)`), which looks identical to a broken deploy but shows a clean
+      deploy log. If the site loads to a blank screen after import, check the
+      env vars before anything else.
+- [ ] **3b. Turn off "Require team login."** A newly created Netlify account
+      defaults new sites to visitor access restricted to team members —
+      Site configuration → Visitor access → **Team members only** unchecked
+      (or `requireSSOTeamLogin: false` if setting it via the Netlify MCP/API).
+      Left on, the site 403s every public visitor, including you in a normal
+      browser tab, even though the deploy and the env vars are both fine.
 - [ ] **4. Deploy and test on the temporary URL** — work through §7.3 before
       touching the old site. Nothing is committed until the rename.
 
