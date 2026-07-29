@@ -82,6 +82,21 @@ const MILESTONES = [
 const PORTFOLIO = [
   { id: "x1", profile_id: USER_ID, kind: "website", title: "Site", description: "d", url: "https://example.com", file_url: null, order_index: 0 },
 ];
+const PENDING_COSIGNS = [
+  {
+    id: "cs1", relationship_type: "contributor", note: "We shipped the routing engine together.",
+    created_at: new Date().toISOString(), portfolio_item_id: "x1", project_title: "Site",
+    peer_slug: "ada-rao", peer_name: "Ada Rao", peer_headline: "Founder, Northwind", peer_photo_url: null,
+  },
+];
+const ACCEPTED_COSIGNS = [
+  {
+    id: "cs2", direction: "received", relationship_type: "client", note: "They delivered on time.",
+    featured: false, created_at: new Date().toISOString(), portfolio_item_id: "x1",
+    project_title: "Site", peer_slug: "bo-chen", peer_name: "Bo Chen",
+    peer_headline: "Ops lead", peer_photo_url: null,
+  },
+];
 
 /** Fixture router: URL in, JSON body out. */
 function fixtureFor(url, method) {
@@ -99,6 +114,8 @@ function fixtureFor(url, method) {
     }];
   if (u.includes("/rest/v1/rpc/list_public_profiles")) return [PROFILE];
   if (u.includes("/rest/v1/rpc/get_public_profile_by_slug")) return [PROFILE];
+  if (u.includes("/rest/v1/rpc/my_pending_cosigns")) return PENDING_COSIGNS;
+  if (u.includes("/rest/v1/rpc/list_profile_cosigns")) return ACCEPTED_COSIGNS;
   if (u.includes("/rest/v1/rpc/")) return method === "POST" ? {} : [];
   if (u.startsWith("/rest/v1/user_roles")) return [{ role: "admin" }];
   if (u.startsWith("/rest/v1/profiles")) return [PROFILE];
@@ -125,6 +142,13 @@ const ROUTES = [
   // even when the inbox read fails, which is the failure mode that matters.
   { path: "/app", name: "dashboard · inbox lists a message", expect: "ada@example.com" },
   { path: "/app", name: "dashboard · inbox unread count", expect: "1 unread" },
+  // Co-sign: assert the peer's name and the endorsement text, not the
+  // heading — both come from RPCs, and a heading renders regardless.
+  { path: "/app", name: "dashboard · pending co-sign", expect: "Ada Rao" },
+  { path: "/app", name: "dashboard · co-sign note", expect: "routing engine" },
+  { path: "/app", name: "dashboard · accepted co-sign", expect: "Bo Chen" },
+  { path: "/u/smoke-tester", name: "public · co-sign network renders", expect: "Co-Sign Network" },
+  { path: "/u/smoke-tester", name: "public · co-sign peer node", expect: "Verified by 1 peer" },
   { path: "/app", name: "dashboard · danger zone", expect: "Delete account" },
   { path: "/app/edit", name: "editor", expect: "Edit your profile" },
   { path: "/app/design", name: "design", expect: "Template" },

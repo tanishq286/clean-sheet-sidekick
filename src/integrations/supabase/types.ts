@@ -164,6 +164,53 @@ export type Database = {
           },
         ]
       }
+      portfolio_cosigns: {
+        Row: {
+          cosigner_user_id: string
+          created_at: string
+          featured: boolean
+          id: string
+          note: string | null
+          portfolio_item_id: string
+          relationship_type: Database["public"]["Enums"]["cosign_relationship"]
+          responded_at: string | null
+          status: Database["public"]["Enums"]["cosign_status"]
+          target_user_id: string
+        }
+        Insert: {
+          cosigner_user_id: string
+          created_at?: string
+          featured?: boolean
+          id?: string
+          note?: string | null
+          portfolio_item_id: string
+          relationship_type: Database["public"]["Enums"]["cosign_relationship"]
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["cosign_status"]
+          target_user_id: string
+        }
+        Update: {
+          cosigner_user_id?: string
+          created_at?: string
+          featured?: boolean
+          id?: string
+          note?: string | null
+          portfolio_item_id?: string
+          relationship_type?: Database["public"]["Enums"]["cosign_relationship"]
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["cosign_status"]
+          target_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_cosigns_portfolio_item_id_fkey"
+            columns: ["portfolio_item_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_messages: {
         Row: {
           body: string
@@ -347,6 +394,8 @@ export type Database = {
     }
     Enums: {
       app_role: "student" | "admin" | "college_admin"
+      cosign_relationship: "contributor" | "client" | "verified_peer"
+      cosign_status: "pending" | "accepted" | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -475,6 +524,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "admin", "college_admin"],
+      cosign_relationship: ["contributor", "client", "verified_peer"],
+      cosign_status: ["pending", "accepted", "declined"],
     },
   },
 } as const

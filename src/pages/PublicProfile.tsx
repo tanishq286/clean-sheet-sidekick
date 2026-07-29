@@ -9,6 +9,7 @@ import HabitsBlock from "@/templates/shared/HabitsBlock";
 import SeoHead from "@/components/GeoAeoEngine/SeoHead";
 import ContactSection from "@/components/ContactSection";
 import SoundToggle from "@/components/SoundToggle";
+import CoSignSection from "@/components/cosign/CoSignSection";
 
 export default function PublicProfile() {
   const { slug } = useParams<{ slug: string }>();
@@ -90,6 +91,7 @@ export default function PublicProfile() {
         <SoundToggle className="border-current/30 bg-background/80 backdrop-blur-sm" />
       </div>
       <Template profile={profile} />
+      <CoSignSection profile={profile} />
       {profile.theme?.display_habits && <HabitsBlock slug={profile.slug} />}
       {/* Absent means on: profiles created before this setting existed keep
           the contact form they already had. */}
