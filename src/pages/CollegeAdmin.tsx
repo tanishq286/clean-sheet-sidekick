@@ -112,12 +112,25 @@ export default function CollegeAdmin() {
   const saveEdit = async () => {
     if (!activeCollegeId) return;
     if (!editDraft.name || !editDraft.slug) return toast({ title: "Name and slug required", variant: "destructive" });
-    const { error } = await supabase.from("colleges").update({
+    // `.select()` matters here, and not for the returned data. A failing RLS
+    // USING clause doesn't raise — Postgres just filters the row out, so the
+    // update touches 0 rows and PostgREST answers 204 with error === null.
+    // Checking only `error` reported "College updated" while nothing changed,
+    // which is the worst kind of wrong: the refetch then redraws the old
+    // values and the edit looks like it silently reverted.
+    const { data, error } = await supabase.from("colleges").update({
       name: editDraft.name,
       slug: editDraft.slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
       domain: editDraft.domain || null,
-    }).eq("id", activeCollegeId);
+    }).eq("id", activeCollegeId).select("id");
     if (error) return toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    if (!data?.length) {
+      return toast({
+        title: "Update blocked",
+        description: "You don't have permission to edit this college. Ask a platform admin.",
+        variant: "destructive",
+      });
+    }
     toast({ title: "College updated" });
     setEditing(false);
     qc.invalidateQueries({ queryKey: ["colleges"] });
@@ -126,8 +139,17 @@ export default function CollegeAdmin() {
     if (!activeCollegeId || !activeCollege) return;
     if (!confirm(`Delete "${activeCollege.name}"? This removes all member assignments for this college.`)) return;
     await supabase.from("college_members").delete().eq("college_id", activeCollegeId);
-    const { error } = await supabase.from("colleges").delete().eq("id", activeCollegeId);
+    // Same RLS-returns-no-error trap as saveEdit: confirm a row actually went.
+    const { data, error } = await supabase
+      .from("colleges").delete().eq("id", activeCollegeId).select("id");
     if (error) return toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    if (!data?.length) {
+      return toast({
+        title: "Delete blocked",
+        description: "You don't have permission to delete this college. Ask a platform admin.",
+        variant: "destructive",
+      });
+    }
     toast({ title: "College deleted" });
     setSelectedCollege(null);
     setEditing(false);

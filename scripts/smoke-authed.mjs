@@ -83,9 +83,12 @@ function fixtureFor(url, method) {
   if (u.startsWith("/auth/v1/logout")) return {};
   if (u.includes("/rest/v1/rpc/my_profile_view_stats")) return [{ total: 12, last_7d: 3, last_30d: 8 }];
   if (u.includes("/rest/v1/rpc/admin_overview"))
-    return [{ total_users: 5, total_profiles: 5, published_profiles: 2, draft_profiles: 3, total_views: 12, views_7d: 3, total_colleges: 66, signups_7d: 1 }];
+    return [{ total_users: 5, total_profiles: 5, published_profiles: 2, draft_profiles: 3, total_views: 12, views_7d: 3, total_colleges: 66, signups_7d: 1, featured_profiles: 1, verified_profiles: 1, archived_profiles: 0 }];
   if (u.includes("/rest/v1/rpc/admin_list_profiles"))
-    return [{ ...PROFILE, name: "Smoke Tester", email: "smoke@example.test", views: 12, is_admin: true }];
+    return [{
+      ...PROFILE, name: "Smoke Tester", email: "smoke@example.test", views: 12, is_admin: true,
+      is_featured: false, is_verified: false, archived_at: null,
+    }];
   if (u.includes("/rest/v1/rpc/list_public_profiles")) return [PROFILE];
   if (u.includes("/rest/v1/rpc/")) return method === "POST" ? {} : [];
   if (u.startsWith("/rest/v1/user_roles")) return [{ role: "admin" }];
@@ -114,6 +117,11 @@ const ROUTES = [
   { path: "/app/export", name: "export", expect: null },
   { path: "/app/admin", name: "admin dashboard", expect: "Admin" },
   { path: "/app/admin", name: "admin · people table", expect: "smoke@example.test" },
+  // The moderation controls are the point of this screen; assert they render
+  // rather than only that the page mounted.
+  { path: "/app/admin", name: "admin · status filters", expect: "Featured" },
+  { path: "/app/admin", name: "admin · verify control", expect: "Verify" },
+  { path: "/app/admin", name: "admin · archive control", expect: "Archive" },
   { path: "/app/college", name: "college admin", expect: null },
 ];
 

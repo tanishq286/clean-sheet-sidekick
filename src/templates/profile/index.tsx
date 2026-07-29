@@ -39,7 +39,13 @@ export default function ProfileTemplate({ profile }: TemplateProps) {
               <div className="w-full h-full" style={{ background: `linear-gradient(135deg, var(--accent), #111827)` }} />
             )}
           </div>
-          <div className="px-6 md:px-10 pb-8 -mt-16 md:-mt-20">
+          {/* `relative` is load-bearing, not decoration. The cover wrapper above
+              is positioned, and positioned elements paint above non-positioned
+              siblings no matter the DOM order — so without this the cover
+              covered the top slice of the avatar that -mt pulls into it.
+              Framer Motion's transform hid the bug during the entrance
+              animation and it reappeared once the animation settled. */}
+          <div className="relative z-10 px-6 md:px-10 pb-8 -mt-16 md:-mt-20">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               {identity.photo_url ? (
                 <img src={identity.photo_url} alt={identity.name}
