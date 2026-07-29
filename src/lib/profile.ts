@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { callRpc, firstRow } from "@/lib/rpc";
 import type { FullProfile, FounderProfile, Skill, Milestone, PortfolioItem } from "@/types/founder";
 
 export async function fetchMyProfile(userId: string): Promise<FullProfile | null> {
@@ -10,13 +11,12 @@ export async function fetchMyProfile(userId: string): Promise<FullProfile | null
 }
 
 export async function fetchProfileBySlug(slug: string): Promise<FullProfile | null> {
-  const rpc = supabase.rpc as unknown as (
-    fn: string,
-    args: Record<string, string>,
-  ) => Promise<{ data: FounderProfile | FounderProfile[] | null; error: Error | null }>;
-  const { data, error } = await rpc("get_public_profile_by_slug", { _slug: slug });
-  if (error) throw error;
-  const profile = Array.isArray(data) ? data[0] : data;
+  const { data, error } = await callRpc<FounderProfile | FounderProfile[]>(
+    "get_public_profile_by_slug",
+    { _slug: slug },
+  );
+  if (error) throw new Error(error.message);
+  const profile = firstRow(data);
   if (!profile) return null;
   return await hydrate(profile as unknown as FounderProfile);
 }

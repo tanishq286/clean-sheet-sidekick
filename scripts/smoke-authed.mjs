@@ -90,6 +90,7 @@ function fixtureFor(url, method) {
       is_featured: false, is_verified: false, archived_at: null,
     }];
   if (u.includes("/rest/v1/rpc/list_public_profiles")) return [PROFILE];
+  if (u.includes("/rest/v1/rpc/get_public_profile_by_slug")) return [PROFILE];
   if (u.includes("/rest/v1/rpc/")) return method === "POST" ? {} : [];
   if (u.startsWith("/rest/v1/user_roles")) return [{ role: "admin" }];
   if (u.startsWith("/rest/v1/profiles")) return [PROFILE];
@@ -123,6 +124,12 @@ const ROUTES = [
   { path: "/app/admin", name: "admin · verify control", expect: "Verify" },
   { path: "/app/admin", name: "admin · archive control", expect: "Archive" },
   { path: "/app/college", name: "college admin", expect: null },
+  // These two go through RPCs rather than table reads, and both assert on
+  // *data* rather than a heading. A heading renders even when the call throws
+  // before reaching the network, which is precisely how a detached
+  // `supabase.rpc` broke both pages while every suite stayed green.
+  { path: "/discover", name: "discover · renders a profile row", expect: "Smoke Tester" },
+  { path: "/u/smoke-tester", name: "public profile · renders via RPC", expect: "Smoke Tester" },
 ];
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });

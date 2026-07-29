@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { callRpc } from "@/lib/rpc";
 import { Input } from "@/components/ui/input";
 import { SKILL_LABEL, LOOKING_LABEL, STAGE_LABEL } from "@/templates/shared/themeStyle";
 import type { LookingFor, SkillTag, StartupStage } from "@/types/founder";
@@ -34,10 +35,7 @@ export default function Discover() {
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ["directory"],
     queryFn: async () => {
-      const rpc = supabase.rpc as unknown as (
-        fn: string,
-      ) => Promise<{ data: DirectoryRow[] | null; error: { message: string } | null }>;
-      const { data, error } = await rpc("list_public_profiles");
+      const { data, error } = await callRpc<DirectoryRow[]>("list_public_profiles");
       if (error) throw new Error(error.message);
       return data ?? [];
     },

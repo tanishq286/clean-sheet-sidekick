@@ -15,7 +15,8 @@
     "typecheck": "tsc -b --force",
     "test:templates": "node scripts/sweep-templates.mjs",
     "test:routes": "node scripts/smoke-routes.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run build",
+    "check:rpc": "node scripts/check-rpc-binding.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run check:rpc && npm run build",
     "verify:full": "npm run verify && npm run preview:test",
     "preview:test": "node scripts/run-with-preview.mjs",
     "test:authed": "node scripts/smoke-authed.mjs"

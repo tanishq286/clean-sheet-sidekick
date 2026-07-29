@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { callRpc, firstRow } from "@/lib/rpc";
 
 const VISITOR_KEY = "founderid-visitor";
 
@@ -35,11 +35,7 @@ function visitorHash(): string | null {
  */
 export async function recordProfileView(slug: string): Promise<void> {
   try {
-    const rpc = supabase.rpc as unknown as (
-      fn: string,
-      args: Record<string, string | null>,
-    ) => Promise<unknown>;
-    await rpc("record_profile_view", {
+    await callRpc("record_profile_view", {
       _slug: slug,
       _visitor: visitorHash(),
       // Same-origin navigations tell us nothing; only external referrers do.
@@ -60,10 +56,6 @@ export interface ViewStats {
 }
 
 export async function fetchMyViewStats(): Promise<ViewStats> {
-  const rpc = supabase.rpc as unknown as (
-    fn: string,
-  ) => Promise<{ data: ViewStats[] | ViewStats | null; error: unknown }>;
-  const { data } = await rpc("my_profile_view_stats");
-  const row = Array.isArray(data) ? data[0] : data;
-  return row ?? { total: 0, last_7d: 0, last_30d: 0 };
+  const { data } = await callRpc<ViewStats | ViewStats[]>("my_profile_view_stats");
+  return firstRow(data) ?? { total: 0, last_7d: 0, last_30d: 0 };
 }

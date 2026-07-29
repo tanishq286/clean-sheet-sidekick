@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { callRpc } from "@/lib/rpc";
 import { useAuth } from "@/hooks/useAuth";
 import Counter from "@/components/Counter";
 
@@ -56,11 +57,10 @@ interface Overview {
 const FILTERS = ["All", "Published", "Draft", "Featured", "Verified", "Admins", "Archived"] as const;
 type Filter = (typeof FILTERS)[number];
 
-const rpc = <T,>(fn: string, args?: Record<string, unknown>) =>
-  (supabase.rpc as unknown as (f: string, a?: Record<string, unknown>) => Promise<{ data: T; error: { message: string } | null }>)(
-    fn,
-    args,
-  );
+// Was a parenthesised cast, which happens to preserve `this` — but the
+// near-identical assignment form does not, and that difference silently broke
+// four other features. Route everything through the one helper instead.
+const rpc = callRpc;
 
 export default function AdminDashboard() {
   const { user } = useAuth();

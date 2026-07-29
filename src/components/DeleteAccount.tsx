@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { callRpc } from "@/lib/rpc";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,8 +76,7 @@ export default function DeleteAccount() {
         /* orphaned assets are recoverable; a blocked deletion is not */
       }
 
-      const rpc = supabase.rpc as unknown as (fn: string) => Promise<{ error: { message: string } | null }>;
-      const { error } = await rpc("delete_my_account");
+      const { error } = await callRpc("delete_my_account");
       if (error) throw new Error(error.message);
 
       await signOut();
