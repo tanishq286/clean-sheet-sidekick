@@ -18,6 +18,7 @@ export default function CollegeAdmin() {
   const [editing, setEditing] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [editDraft, setEditDraft] = useState({ name: "", slug: "", domain: "" });
+  const [collegeFilter, setCollegeFilter] = useState("");
 
   const { data: roles = [], isLoading: rolesLoading } = useQuery({
     queryKey: ["roles", user?.id],
@@ -35,6 +36,14 @@ export default function CollegeAdmin() {
 
   const activeCollegeId = selectedCollege ?? colleges[0]?.id ?? null;
   const activeCollege = colleges.find((c: any) => c.id === activeCollegeId) ?? null;
+
+  const visibleColleges = useMemo(() => {
+    const q = collegeFilter.trim().toLowerCase();
+    if (!q) return colleges;
+    return colleges.filter((c: any) =>
+      `${c.name ?? ""} ${c.slug ?? ""} ${c.domain ?? ""}`.toLowerCase().includes(q),
+    );
+  }, [colleges, collegeFilter]);
 
   const { data: members = [] } = useQuery({
     queryKey: ["college-members", activeCollegeId],
@@ -72,16 +81,22 @@ export default function CollegeAdmin() {
   const [newCollege, setNewCollege] = useState({ name: "", slug: "", domain: "" });
   const createCollege = async () => {
     if (!newCollege.name || !newCollege.slug) return toast({ title: "Name and slug required", variant: "destructive" });
-    const { error } = await supabase.from("colleges").insert({
+    const { data, error } = await supabase.from("colleges").insert({
       name: newCollege.name,
       slug: newCollege.slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
       domain: newCollege.domain || null,
       created_by: user!.id,
-    });
+    }).select("id").maybeSingle();
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
     setNewCollege({ name: "", slug: "", domain: "" });
     toast({ title: "College created" });
-    qc.invalidateQueries({ queryKey: ["colleges"] });
+    await qc.invalidateQueries({ queryKey: ["colleges"] });
+    // Select the college that was just created. Without this the page keeps
+    // showing whichever college sorts first (there are 70+ seeded ones, so
+    // that is always "Anna University"), and a newly created college is a
+    // button buried alphabetically among them — creating one looked like it
+    // had silently done nothing.
+    if (data?.id) setSelectedCollege(data.id);
   };
 
   const [inviteEmail, setInviteEmail] = useState("");
@@ -187,13 +202,33 @@ export default function CollegeAdmin() {
           <div className="text-muted-foreground border rounded-lg p-8 text-center">No colleges yet.</div>
         ) : (
           <>
-            <div className="flex flex-wrap gap-2">
-              {colleges.map((c: any) => (
-                <button key={c.id} onClick={() => setSelectedCollege(c.id)}
-                  className={`px-4 py-2 rounded-md border text-sm ${activeCollegeId === c.id ? "bg-foreground text-background" : ""}`}>
-                  {c.name}
-                </button>
-              ))}
+            {/* 70+ seeded colleges make an unfiltered button wall unusable —
+                finding the one you just created meant scanning every row. */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Input
+                  value={collegeFilter}
+                  onChange={(e) => setCollegeFilter(e.target.value)}
+                  placeholder="Filter colleges…"
+                  aria-label="Filter colleges"
+                  className="max-w-xs"
+                />
+                <span className="text-sm text-muted-foreground tabular-nums">
+                  {visibleColleges.length} of {colleges.length}
+                </span>
+              </div>
+              {visibleColleges.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No college matches “{collegeFilter}”.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {visibleColleges.map((c: any) => (
+                    <button key={c.id} onClick={() => setSelectedCollege(c.id)}
+                      className={`px-4 py-2 rounded-md border text-sm ${activeCollegeId === c.id ? "bg-foreground text-background" : ""}`}>
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <section className="grid sm:grid-cols-3 gap-4">

@@ -1,0 +1,27 @@
+-- Every uploaded profile photo rendered as a broken image.
+--
+-- The app stores the URL produced by `getPublicUrl()`, which is
+-- /storage/v1/object/public/profile-assets/<uid>/<file>. Supabase only serves
+-- that endpoint for buckets flagged public — for a private bucket it 400s no
+-- matter how permissive the RLS policies are, and this bucket was created with
+-- public = false. The existing SELECT policies ("Owner reads own profile
+-- assets", "Public reads assets of published profiles") were therefore doing
+-- nothing for reads: the request never got far enough to be evaluated.
+--
+-- Making the bucket public is the right resolution rather than a shortcut:
+-- these are profile photographs on profile pages we deliberately expose to
+-- search engines and AI crawlers. A photo nobody can load is the bug.
+--
+-- The alternative — keeping the bucket private and minting signed URLs — was
+-- rejected because signed URLs expire, and the URL is persisted in
+-- profiles.identity. Every stored link would rot, and the edge prerender and
+-- the OG image function would each need signing logic of their own.
+--
+-- Trade-off worth stating plainly: with a public bucket, an asset belonging to
+-- an *unpublished* profile is readable by anyone who has the exact URL, which
+-- the "published only" policy above had intended to prevent. Paths contain a
+-- user UUID and an upload timestamp, so they are not enumerable, and the
+-- storage listing API still requires auth. Writes are unaffected — the INSERT,
+-- UPDATE and DELETE policies still restrict every object to its owner's
+-- folder.
+update storage.buckets set public = true where id = 'profile-assets';
