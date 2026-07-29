@@ -1,5 +1,10 @@
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+// The `-pro` fork, not the original: html2canvas 1.x's color parser doesn't
+// understand oklch(), which is what Tailwind v4's palette resolves to, so
+// every export crashed on `Attempting to parse an unsupported color
+// function`. This fork adds oklch/oklab/lab/lch/color-mix support and is
+// otherwise a drop-in replacement — same call, same options.
+import html2canvas from "html2canvas-pro";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { getTemplate } from "@/templates/registry";
