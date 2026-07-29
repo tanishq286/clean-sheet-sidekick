@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -40,7 +41,7 @@ export default function ResetPassword() {
         <h1 className="text-2xl font-bold mb-6">Set a new password</h1>
         {!ready ? <p className="text-muted-foreground">Validating reset link…</p> : (
           <form onSubmit={submit} className="space-y-4">
-            <div><Label htmlFor="p">New password</Label><Input id="p" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+            <div><Label htmlFor="p">New password</Label><Input id="p" type="password" required minLength={MIN_PASSWORD_LENGTH} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
             <Button type="submit" disabled={loading} className="w-full">{loading ? "…" : "Update password"}</Button>
           </form>
         )}

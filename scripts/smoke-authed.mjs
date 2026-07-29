@@ -107,6 +107,7 @@ const ROUTES = [
   // stats call is broken, so only the value proves the wiring works.
   { path: "/app", name: "dashboard · view count", expect: "12" },
   { path: "/app", name: "dashboard · publish control", expect: "Published" },
+  { path: "/app", name: "dashboard · change password", expect: "Change password" },
   { path: "/app", name: "dashboard · danger zone", expect: "Delete account" },
   { path: "/app/edit", name: "editor", expect: "Edit your profile" },
   { path: "/app/design", name: "design", expect: "Template" },
@@ -118,8 +119,15 @@ const ROUTES = [
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 const failures = [];
+let checksRun = 0;
 
-for (const route of ROUTES) {
+/**
+ * A signed-in page with every Supabase call served from fixtures.
+ *
+ * The route sweep and each interaction block need exactly this setup, and the
+ * duplicated copies had already started to drift apart.
+ */
+async function fixturePage() {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 
   // Seed the session before any app code runs, so getSession() resolves from
@@ -143,6 +151,28 @@ for (const route of ROUTES) {
     }
     return r.continue();
   });
+
+  return { context, page };
+}
+
+/**
+ * Records one assertion.
+ *
+ * Counting here rather than hardcoding a total is deliberate: the template
+ * sweep once silently reported 30/36 because its count was written by hand.
+ */
+function check(name, pass, detail = "") {
+  checksRun++;
+  if (pass) console.log(`PASS  ${name}`);
+  else {
+    failures.push({ name });
+    console.log(`FAIL  ${name}${detail ? "  — " + detail : ""}`);
+  }
+  return pass;
+}
+
+for (const route of ROUTES) {
+  const { context, page } = await fixturePage();
 
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e).slice(0, 140)));
@@ -180,6 +210,7 @@ for (const route of ROUTES) {
 
   if (errors.length) problems.push(`js error: ${errors[0]}`);
 
+  checksRun++;
   if (problems.length) {
     failures.push(route);
     console.log(`FAIL  ${route.name.padEnd(28)} ${route.path.padEnd(14)} ${problems.join("; ")}`);
@@ -195,34 +226,7 @@ for (const route of ROUTES) {
 /* rendering the form correctly is not enough — the gate has to hold.  */
 /* ------------------------------------------------------------------ */
 {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  await context.addInitScript(
-    ([key, session]) => window.localStorage.setItem(key, JSON.stringify(session)),
-    [`sb-${REF}-auth-token`, SESSION],
-  );
-  const page = await context.newPage();
-  await page.route("**/*", async (r) => {
-    const url = r.request().url();
-    if (/fonts\.(googleapis|gstatic)\.com/.test(url)) return r.abort();
-    if (url.startsWith(SUPABASE_URL)) {
-      return r.fulfill({
-        status: 200,
-        contentType: "application/json",
-        headers: { "access-control-allow-origin": "*" },
-        body: JSON.stringify(fixtureFor(url, r.request().method())),
-      });
-    }
-    return r.continue();
-  });
-
-  const check = (name, pass, detail = "") => {
-    if (pass) console.log(`PASS  ${name}`);
-    else {
-      failures.push({ name });
-      console.log(`FAIL  ${name}${detail ? "  — " + detail : ""}`);
-    }
-    return pass;
-  };
+  const { context, page } = await fixturePage();
 
   try {
     await page.goto(`${BASE}/app`, { waitUntil: "domcontentloaded" });
@@ -258,7 +262,75 @@ for (const route of ROUTES) {
   await context.close();
 }
 
+/* ------------------------------------------------------------------ */
+/* Interaction: changing a password must require the current one.      */
+/* An unlocked, already-signed-in browser must not be enough to lock   */
+/* the real owner out, so the submit button is the gate under test —   */
+/* every way of getting it enabled without the old password is a bug.  */
+/* ------------------------------------------------------------------ */
+{
+  const { context, page } = await fixturePage();
+  const CURRENT = "hunter2";
+
+  try {
+    await page.goto(`${BASE}/app`, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1800);
+
+    await page.getByRole("button", { name: "Change password" }).click();
+    await page.waitForTimeout(300);
+
+    const submit = page.getByRole("button", { name: "Update password" });
+    const currentBox = page.getByPlaceholder("Current password");
+    const nextBox = page.getByPlaceholder(/At least \d+ characters/);
+    const confirmBox = page.getByPlaceholder("Repeat it");
+
+    check("password · form opens", await currentBox.count() === 1 && await nextBox.count() === 1);
+    check("password · disabled on open", await submit.isDisabled());
+
+    // A valid new password with no current password must not be enough.
+    await nextBox.fill("a-much-better-password");
+    await confirmBox.fill("a-much-better-password");
+    await page.waitForTimeout(200);
+    check("password · locked without the current one", await submit.isDisabled());
+
+    await currentBox.fill(CURRENT);
+    await page.waitForTimeout(200);
+    check("password · unlocks once all three are given", !(await submit.isDisabled()));
+
+    await confirmBox.fill("a-different-password");
+    await page.waitForTimeout(200);
+    const body = () => page.evaluate(() => document.body.innerText);
+    check(
+      "password · rejects a mismatched confirmation",
+      (await submit.isDisabled()) && /don't match/i.test(await body()),
+    );
+
+    await nextBox.fill("abc");
+    await confirmBox.fill("abc");
+    await page.waitForTimeout(200);
+    check(
+      "password · rejects one that's too short",
+      (await submit.isDisabled()) && /at least \d+ characters/i.test(await body()),
+    );
+
+    // Re-submitting the existing password is a no-op that looks like success.
+    await nextBox.fill(CURRENT);
+    await confirmBox.fill(CURRENT);
+    await page.waitForTimeout(200);
+    check("password · rejects reusing the current one", await submit.isDisabled());
+
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await page.waitForTimeout(300);
+    check(
+      "password · cancel clears the form",
+      await page.getByRole("button", { name: "Change password" }).count() === 1,
+    );
+  } catch (e) {
+    check("password gating", false, String(e).slice(0, 110));
+  }
+  await context.close();
+}
+
 await browser.close();
-const total = ROUTES.length + 5;
-console.log(`\n${total - failures.length}/${total} signed-in checks clean`);
+console.log(`\n${checksRun - failures.length}/${checksRun} signed-in checks clean`);
 process.exit(failures.length ? 1 : 0);

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { rememberPostAuthRedirect } from "@/lib/authRedirect";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password";
 
 function GoogleIcon() {
   return (
@@ -128,7 +129,7 @@ export default function Auth() {
           {mode !== "reset" && (
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              <Input id="password" type="password" required minLength={MIN_PASSWORD_LENGTH} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
             </div>
           )}
           <Button type="submit" className="w-full" disabled={loading}>

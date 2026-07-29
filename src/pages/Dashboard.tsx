@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import AeoScoreCard from "@/components/GeoAeoEngine/AeoScoreCard";
 import ViewsCard from "@/components/ViewsCard";
 import PublishToggle from "@/components/PublishToggle";
+import ChangePassword from "@/components/ChangePassword";
 import DeleteAccount from "@/components/DeleteAccount";
 import type { FullProfile } from "@/types/founder";
 
@@ -46,6 +47,10 @@ export default function Dashboard() {
           <AeoScoreCard profile={profile} />
         </section>
         <ManageSection profile={profile} />
+        <section>
+          <SectionHeading eyebrow="Account" title="Sign-in & security" />
+          <ChangePassword />
+        </section>
         <section>
           <SectionHeading eyebrow="Account" title="Danger zone" />
           <DeleteAccount />

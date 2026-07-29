@@ -133,13 +133,128 @@ pointing at a domain that isn't serving the site yet.
 - [ ] **7. Google Search Console:** add `iev.mba` as a property, verify it, and
       submit the sitemap/URLs. Nothing gets crawled faster than you ask for it.
 
-## 7. Verifying the app (automated)
+## 7. Moving the site to a different Netlify account
+
+Use this when the current team's free allowance runs out, or to hand ownership
+to the founder's email. Today's setup:
+
+| | |
+| --- | --- |
+| Team | `tanishq28` (slug `tanishq286`) — **Free** plan |
+| Site name | `portfoliobuildersiev` |
+| Site ID | `c0c8e5f5-be3a-458d-b2e3-7c92048806c3` |
+| Source | GitHub `tanishq286/clean-sheet-sidekick`, branch `main` |
+
+**Almost nothing lives in Netlify.** The build command, publish directory,
+functions directory, edge-functions directory, the OG-image redirects and the
+SPA fallback are all in `netlify.toml`, which is committed. A new site pointed
+at this repo configures itself. Only four things are held outside the repo:
+
+1. the three `VITE_SUPABASE_*` environment variables,
+2. the custom domain,
+3. the `portfoliobuildersiev` subdomain name,
+4. the Supabase redirect allow-list (which names the domain, not the account).
+
+> Netlify's free allowance resets at the start of each billing period.
+> **Team → Usage** shows which resource ran out and when it comes back — if the
+> reset is a few days away, waiting is less work than any of this.
+
+### Option A — transfer the site (keeps everything, no downtime)
+
+Preferred when your dashboard offers it, because the site ID, domain, deploy
+history and env vars all come along: no DNS change, no Supabase change, and the
+`.netlify.app` name is preserved.
+
+- [ ] Create the new account at netlify.com using `founderid.help@gmail.com`.
+- [ ] From the **old** team: Site settings → General → **Transfer site**, and
+      pick the new team. Netlify requires you to be a member of both teams, so
+      you may first need to invite one account to the other. Free teams cap the
+      member count — if the invite is refused, that's the signal to use Option B.
+- [ ] Confirm the site now appears under the new team, then trigger a deploy and
+      re-run the checks in §7.3.
+
+### Option B — rebuild on the new account (always works)
+
+- [ ] **1. Create the account** at netlify.com with `founderid.help@gmail.com`.
+- [ ] **2. Add new site → Import an existing project → GitHub**, authorise it,
+      and pick `tanishq286/clean-sheet-sidekick`, branch `main`.
+      Leave build command and publish directory as detected — `netlify.toml`
+      already sets `npm run build` and `dist`.
+      Accept whatever temporary name Netlify suggests; §7.2 renames it.
+- [ ] **3. Set the environment variables** before the first deploy finishes
+      (Site configuration → Environment variables). Copy the values from the
+      repo's `.env`:
+
+      | Key | Value |
+      | --- | --- |
+      | `VITE_SUPABASE_URL` | `https://ytymuqlajzmysujgrksc.supabase.co` |
+      | `VITE_SUPABASE_PROJECT_ID` | `ytymuqlajzmysujgrksc` |
+      | `VITE_SUPABASE_PUBLISHABLE_KEY` | the project's publishable key |
+
+      ⚠️ Leave the scope as **"All scopes"**, not "Builds only".
+      `netlify/edge-functions/profile-seo.ts` reads `VITE_SUPABASE_URL` and
+      `VITE_SUPABASE_PUBLISHABLE_KEY` at *request* time. Scoped to builds only,
+      the edge function silently stops prerendering JSON-LD — the pages still
+      look fine in a browser, and every crawler stops seeing structured data.
+
+      None of these are secrets: the publishable key is shipped to the browser
+      and is safe in a public repo. RLS is what protects the data.
+- [ ] **4. Deploy and test on the temporary URL** — work through §7.3 before
+      touching the old site. Nothing is committed until the rename.
+
+### 7.2 Reclaiming the `portfoliobuildersiev` name
+
+`*.netlify.app` names are globally unique, so the new site cannot take the name
+while the old site still holds it. Order matters:
+
+- [ ] **1. Old site** → Site configuration → **Change site name** → something
+      throwaway, e.g. `portfoliobuildersiev-old`. (Renaming, not deleting, keeps
+      a way back for a few days.)
+- [ ] **2. New site** → Change site name → `portfoliobuildersiev`.
+- [ ] **3. Redeploy the new site.** `index.html` and `llms.txt` bake in the
+      canonical host from Netlify's `URL` variable at build time, so they only
+      pick up the new name on the *next* build.
+- [ ] **4. Once the new site has served real traffic for a few days**, delete
+      the old one. Leaving it live is what causes duplicate-content confusion.
+
+If you are attaching `iev.mba` anyway (§6), the `.netlify.app` name stops
+mattering — do §6 against the new site and skip this subsection.
+
+### 7.3 Verify before switching the old site off
+
+- [ ] `curl -s https://<new-site>.netlify.app/llms.txt | head -5` → Markdown,
+      not the HTML shell.
+- [ ] `curl -s https://<new-site>.netlify.app/u/yash-mishra | grep -c ld+json`
+      → at least 1. **This is the check that catches a builds-only env-var
+      scope**; the page renders fine either way.
+- [ ] `curl -sI https://<new-site>.netlify.app/api/og?name=Test` → `200` and
+      `content-type: image/png`. Proves the function bundled with its wasm.
+- [ ] Open `/app` and sign in with **Google**. This fails until the next step —
+      that is expected, and is the one thing a new domain always breaks.
+- [ ] **Supabase → Authentication → URL Configuration** for project
+      `ytymuqlajzmysujgrksc`: add the new origin to **Redirect URLs**
+      (both `https://<host>` and `https://<host>/**`), and set **Site URL** to
+      it once you're committed. Keep the old entries until the old site is
+      deleted — extra redirect URLs are harmless.
+- [ ] Retry Google sign-in, then publish/unpublish a profile to confirm writes.
+
+### 7.4 Afterwards, in the repo
+
+Two files carry the old host as a *fallback*, used only when neither `SITE_URL`
+nor Netlify's `URL` is set — so builds on Netlify are already correct and this
+is not urgent. Update them anyway once the final host is settled, or a local
+`npm run build` will bake a canonical tag pointing at a site you deleted:
+
+- `vite.config.ts:15`
+- `scripts/generate-llms.mjs:39`
+
+## 8. Verifying the app (automated)
 
 Two commands. `verify` is the fast gate; `verify:full` adds a real browser.
 
 ```bash
 npm run verify        # typecheck (tsc -b) + eslint + production build
-npm run verify:full   # the above, then 64 browser checks
+npm run verify:full   # the above, then 73 browser checks
 ```
 
 `verify:full` starts and stops its own preview server — a stale one silently
@@ -148,7 +263,7 @@ serving an old build had been producing results that looked real and weren't.
 | Suite | Covers |
 | --- | --- |
 | `test:routes` | 12 public routes: blank screens, uncaught errors, failed same-origin requests, 390px overflow, expected content |
-| `test:authed` | 16 signed-in checks: dashboard, editor, design, export, admin, college, plus the account-deletion gate |
+| `test:authed` | 25 signed-in checks: dashboard, editor, design, export, admin, college, plus the account-deletion and password-change gates |
 | `test:templates` | all 36 designs: render, contrast, milestone toggle, portfolio drawer, Escape-close |
 
 Notes:
@@ -164,5 +279,9 @@ Notes:
   is worse than none.
 - First time on a machine: `npm install && npx playwright install chromium`.
   The browser is a separate download from the npm package.
-- Set `CHROMIUM_PATH` only if you want a browser other than the one Playwright
-  installed (for example an existing Chrome).
+- `Executable doesn't exist at …/chromium_headless_shell-<n>` means the npm
+  package was upgraded past the browser build on disk. Either re-run
+  `npx playwright install chromium`, or point at a browser you already have:
+  `CHROMIUM_PATH=/path/to/chrome npm run preview:test`.
+- The suites count their own assertions rather than hardcoding a total — the
+  template sweep once reported 30/36 because the number was written by hand.
