@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import AeoScoreCard from "@/components/GeoAeoEngine/AeoScoreCard";
 import ViewsCard from "@/components/ViewsCard";
+import InboxCard from "@/components/InboxCard";
 import PublishToggle from "@/components/PublishToggle";
 import ChangePassword from "@/components/ChangePassword";
 import DeleteAccount from "@/components/DeleteAccount";
@@ -39,6 +40,10 @@ export default function Dashboard() {
         <section>
           <SectionHeading eyebrow="Reach" title="Who's seeing your profile" />
           <ViewsCard isPublished={profile.is_published} />
+        </section>
+        <section>
+          <SectionHeading eyebrow="Inbox" title="Messages from your profile" />
+          <InboxCard />
         </section>
         <CompletionSection profile={profile} />
         <ContentSection profile={profile} />

@@ -9,6 +9,7 @@ import {
   type ContactIntent, type ContactPayload, type ContactSectionProps, type Timeline,
 } from "./types";
 import { useMagneticGlow } from "./useMagneticGlow";
+import { callRpc } from "@/lib/rpc";
 
 const INTENTS: { id: ContactIntent; label: string; icon: typeof Briefcase; blurb: string }[] = [
   { id: "project", label: "Project Inquiry", icon: Briefcase, blurb: "Hire me for a scoped piece of work" },
@@ -83,6 +84,22 @@ export default function ContactSection({
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      } else if (slug) {
+        // Deliver to the founder's inbox. Previously this branch didn't exist
+        // and every real submission fell through to mailto: below — which
+        // opens the *visitor's* mail client and hopes they press send. That
+        // silently loses anyone browsing without a mail client configured,
+        // and left the founder with no record that an enquiry was attempted.
+        const { error } = await callRpc("send_profile_message", {
+          _slug: slug,
+          _name: payload.name,
+          _email: payload.email,
+          _body: payload.message,
+          _intent: intent,
+          _budget: isProject ? budget : null,
+          _timeline: isProject ? timeline : null,
+        });
+        if (error) throw new Error(error.message);
       } else if (email) {
         const subject = encodeURIComponent(`[${INTENTS.find((i) => i.id === intent)?.label}] from ${payload.name}`);
         const lines = [

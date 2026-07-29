@@ -164,6 +164,53 @@ export type Database = {
           },
         ]
       }
+      profile_messages: {
+        Row: {
+          body: string
+          budget: number | null
+          created_at: string
+          id: string
+          intent: string | null
+          profile_id: string
+          read_at: string | null
+          sender_email: string
+          sender_name: string
+          timeline: string | null
+        }
+        Insert: {
+          body: string
+          budget?: number | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          profile_id: string
+          read_at?: string | null
+          sender_email: string
+          sender_name: string
+          timeline?: string | null
+        }
+        Update: {
+          body?: string
+          budget?: number | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          profile_id?: string
+          read_at?: string | null
+          sender_email?: string
+          sender_name?: string
+          timeline?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_messages_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           contact: Json

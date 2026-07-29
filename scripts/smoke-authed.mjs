@@ -68,6 +68,14 @@ const PROFILE = {
 };
 
 const SKILLS = [{ id: "s1", profile_id: USER_ID, tag: "product" }];
+const MESSAGES = [
+  {
+    id: "msg1", profile_id: USER_ID, sender_name: "Ada Rao", sender_email: "ada@example.com",
+    intent: "project", budget: 4000, timeline: "1-3 months",
+    body: "I would like to talk about a possible collaboration on logistics routing.",
+    created_at: new Date().toISOString(), read_at: null,
+  },
+];
 const MILESTONES = [
   { id: "m1", profile_id: USER_ID, year: "2024", title: "Started", description: "d", order_index: 0 },
 ];
@@ -97,6 +105,7 @@ function fixtureFor(url, method) {
   if (u.startsWith("/rest/v1/skills")) return SKILLS;
   if (u.startsWith("/rest/v1/journey_milestones")) return MILESTONES;
   if (u.startsWith("/rest/v1/portfolio_items")) return PORTFOLIO;
+  if (u.startsWith("/rest/v1/profile_messages")) return MESSAGES;
   if (u.startsWith("/rest/v1/colleges")) return [];
   if (u.startsWith("/rest/v1/college_members")) return [];
   return [];
@@ -112,6 +121,10 @@ const ROUTES = [
   { path: "/app", name: "dashboard · view count", expect: "12" },
   { path: "/app", name: "dashboard · publish control", expect: "Published" },
   { path: "/app", name: "dashboard · change password", expect: "Change password" },
+  // Assert on the sender, not the "Messages" heading — the heading renders
+  // even when the inbox read fails, which is the failure mode that matters.
+  { path: "/app", name: "dashboard · inbox lists a message", expect: "ada@example.com" },
+  { path: "/app", name: "dashboard · inbox unread count", expect: "1 unread" },
   { path: "/app", name: "dashboard · danger zone", expect: "Delete account" },
   { path: "/app/edit", name: "editor", expect: "Edit your profile" },
   { path: "/app/design", name: "design", expect: "Template" },
